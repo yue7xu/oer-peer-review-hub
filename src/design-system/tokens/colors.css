@@ -1,0 +1,79 @@
+/* OER Peer Review Hub — Color tokens
+   Locked to design.md (project root) — a warm eggshell/ink editorial system,
+   adapted from the supplied DESIGN.md reference. Primitives first, semantic
+   aliases second so every component keeps referencing the same semantic
+   names it always has. */
+
+:root {
+  /* ── Primitives (from design.md) ────────────────────────────── */
+  --color-eggshell:     #fdfcfc;
+  --color-warm-taupe:   #f5f3f1;
+  --color-stone:        #ebe8e4;
+  --color-stone-strong: #d9d4cd; /* derived: a stronger stone for hover/active borders */
+  --color-ink:          #000000;
+  --color-graphite:     #44403b;
+  --color-smoke:        #777169;
+  --color-ash:          #a59f97;
+  --color-violet-spark: #0447ff; /* product-visual accent only — never UI chrome */
+  --color-ember-orange: #ff4704; /* product-visual accent only — never UI chrome */
+  --color-legacy-border:#e5e5e5; /* button hairline, per component spec */
+  --color-on-ink-muted: rgba(253, 252, 252, 0.7); /* secondary text on an ink-fill CTA band */
+
+  /* Muted feedback hues — desaturated to sit inside the warm neutral system.
+     These carry real peer-review-status information (WCAG 1.4.1), so they are
+     kept distinguishable rather than dropped for "97% achromatic" purity. */
+  --color-sage-bg:    #eef3ea; --color-sage-text:    #3f6b34; --color-sage-icon:    #5b8a4c;
+  --color-amber-bg:   #faf1e0; --color-amber-text:   #8a5a1f; --color-amber-icon:   #b3781f;
+  --color-terra-bg:   #f8e9e6; --color-terra-text:   #93402f; --color-terra-icon:   #c0503a;
+  --color-slate-bg:   #eef0f5; --color-slate-text:   #35415c; --color-slate-icon:   #56698f;
+
+  /* ── Semantic: Brand ───────────────────────────────────────── */
+  --brand-primary:          var(--color-ink);
+  --brand-primary-hover:    var(--color-graphite);
+  --brand-primary-subtle:   var(--color-stone);
+  --brand-secondary:        var(--color-graphite);
+  --brand-secondary-hover:  var(--color-ink);
+  --brand-secondary-subtle: var(--color-stone);
+
+  /* ── Semantic: Text ────────────────────────────────────────── */
+  --text-default:     var(--color-ink);
+  --text-muted:       var(--color-smoke);
+  --text-subtle:      var(--color-ash);
+  --text-disabled:    var(--color-ash);
+  --text-inverse:     var(--color-eggshell);
+  --text-brand:       var(--color-ink);
+  --text-brand-hover: var(--color-graphite);
+
+  /* ── Semantic: Surface ─────────────────────────────────────── */
+  --surface-default:  var(--color-eggshell);
+  --surface-raised:   var(--color-eggshell);
+  --surface-subtle:   var(--color-warm-taupe);
+  --surface-disabled: var(--color-stone);
+  --surface-overlay:  var(--color-ink);
+
+  /* ── Semantic: Border ──────────────────────────────────────── */
+  --border-default:  var(--color-stone);
+  --border-strong:   var(--color-stone-strong);
+  --border-disabled: var(--color-stone);
+
+  /* ── Semantic: Interactive ─────────────────────────────────── */
+  --interactive-default:  var(--color-ink);
+  --interactive-hover:    var(--color-graphite);
+  --interactive-active:   var(--color-ink);
+  --interactive-focus:    var(--color-graphite);
+  --interactive-disabled: var(--color-ash);
+
+  /* ── Semantic: Feedback (peer-review + UI state) ───────────── */
+  --feedback-success-background: var(--color-sage-bg);
+  --feedback-success-icon:       var(--color-sage-icon);
+  --feedback-success-text:       var(--color-sage-text);
+  --feedback-warning-background: var(--color-amber-bg);
+  --feedback-warning-icon:       var(--color-amber-icon);
+  --feedback-warning-text:       var(--color-amber-text);
+  --feedback-error-background:   var(--color-terra-bg);
+  --feedback-error-icon:         var(--color-terra-icon);
+  --feedback-error-text:         var(--color-terra-text);
+  --feedback-info-background:    var(--color-slate-bg);
+  --feedback-info-icon:          var(--color-slate-icon);
+  --feedback-info-text:          var(--color-slate-text);
+}

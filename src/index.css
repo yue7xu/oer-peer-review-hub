@@ -1,0 +1,45 @@
+/* Hallmark · pre-emit critique: P5 H5 E4 S5 R5 V5
+ * genre: modern-minimal · macrostructure: preserved-per-page (marketing / app / content families)
+ * design-system: design.md · designed-as-app · theme: studied-DNA (source: user-supplied DESIGN.md)
+ */
+@import "./design-system/styles.css";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background: var(--surface-default);
+  color: var(--text-default);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--text-brand);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--text-brand-hover);
+}
+
+#root {
+  min-height: 100svh;
+}

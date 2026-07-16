@@ -1,0 +1,43 @@
+/* OER Peer Review Hub — Typography tokens
+   Locked to design.md — Waldenburg (substituted with Inter 300) for display/
+   heading type, Inter 400/500 for everything else, Geist Mono for
+   identifiers/DOIs. Whisper-weight headings are the system's signature: never
+   bold a heading, carry emphasis with size, tracking, and color instead. */
+
+:root {
+  /* ── Font families ─────────────────────────────────────────── */
+  --font-heading: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-body:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-label:   "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono:    "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* ── Weights ───────────────────────────────────────────────── */
+  /* Whisper-weight display: never bold or semibold a heading — that's the
+     system's most distinctive, non-negotiable choice. */
+  --weight-display:  300;
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 500; /* alias: 500 is the ceiling for buttons/labels, no 600 in this system */
+  --weight-bold:      300; /* alias: any "bold" heading-styled text uses whisper-weight instead */
+
+  /* ── Headings (Inter 300) — size / line-height / tracking ──── */
+  --text-display-size: 48px;  --text-display-lh: 1.08; --text-display-tracking: -0.02em;
+  --text-h1-size:      36px;  --text-h1-lh:      1.17; --text-h1-tracking: -0.02em;
+  --text-h2-size:      32px;  --text-h2-lh:      1.13; --text-h2-tracking: -0.018em;
+  --text-h3-size:      20px;  --text-h3-lh:      1.35; --text-h3-tracking: normal;
+  --text-h4-size:      18px;  --text-h4-lh:      1.6;  --text-h4-tracking: normal;
+
+  /* ── Body (Inter 400) — size / line-height / tracking ──────── */
+  --body-xl-size: 20px;  --body-xl-lh: 1.35;
+  --body-lg-size: 18px;  --body-lg-lh: 1.6;
+  --body-md-size: 16px;  --body-md-lh: 1.5;  --body-md-tracking: 0.01em;
+  --body-sm-size: 14px;  --body-sm-lh: 1.5;  --body-sm-tracking: 0.01em;
+
+  /* ── Labels (Inter 500) — size / line-height ───────────────── */
+  --label-md-size: 14px;  --label-md-lh: 1.4;
+  --label-sm-size: 12px;  --label-sm-lh: 1.4;
+  --text-caption-size: 10px; --text-caption-lh: 1.6;
+
+  /* ── Code / identifiers (Geist Mono 400) ────────────────────── */
+  --code-md-size: 13px;  --code-md-lh: 1.69;
+}
