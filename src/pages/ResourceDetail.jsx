@@ -7,7 +7,7 @@ import { RubricReviewSection } from "../components/content/RubricReviewSection.j
 import { RubricSidebarNav } from "../components/content/RubricSidebarNav.jsx";
 import { OutboundLink } from "../components/content/OutboundLink.jsx";
 import { Button } from "../components/forms/Button.jsx";
-import { getResourceById, getAggregatedStatus } from "../data/resources.js";
+import { getResourceById } from "../data/resources.js";
 
 const container = { maxWidth: 1280, margin: "0 auto" };
 
@@ -31,7 +31,6 @@ export function ResourceDetail() {
     );
   }
 
-  const aggregatedStatus = getAggregatedStatus(resource);
   const hasRubricReviews = Array.isArray(resource.rubricReviews) && resource.rubricReviews.length > 0;
 
   const details = [
@@ -39,6 +38,7 @@ export function ResourceDetail() {
     ["Licence", resource.license || "Not specified"],
     ["Publish date", resource.publishDate || "Not specified"],
     ["Last updated", resource.lastUpdated || "Not specified"],
+    ["Language(s)", resource.language || "Not specified"],
   ];
   if (resource.doi) details.push(["DOI", resource.doi]);
 
@@ -100,7 +100,6 @@ export function ResourceDetail() {
               {resource.authors}
               {resource.year ? ` · ${resource.year}` : ""}
             </span>
-            <StatusBadge status={aggregatedStatus} />
           </div>
         </div>
       </div>
@@ -135,7 +134,7 @@ export function ResourceDetail() {
             <>
               {/* Layer 2: Review Coverage overview */}
               <section>
-                <h2 style={h2Style}>Review coverage</h2>
+                <h2 style={h2Style}>Peer review</h2>
                 <ReviewCoverageTable rubricReviews={resource.rubricReviews} />
               </section>
 
@@ -169,7 +168,7 @@ export function ResourceDetail() {
                     review begins, its version history and reviewer feedback will appear here.
                   </p>
                 </div>
-                <Button variant="secondary" size="md" href="/for-reviewers">
+                <Button variant="secondary" size="md" href="/community">
                   Volunteer to review
                 </Button>
               </div>
@@ -184,7 +183,7 @@ export function ResourceDetail() {
           {/* Outbound checkout */}
           <div style={{ borderRadius: "var(--radius-lg)", padding: 24, background: "var(--surface-default)", boxShadow: "var(--shadow-subtle)" }}>
             <div style={{ fontFamily: "var(--font-label)", fontSize: 13, color: "var(--text-subtle)", marginBottom: 14 }}>
-              Hosted by {resource.institution} — you&apos;ll leave the Hub to read it.
+              You&apos;ll leave the Hub to read it.
             </div>
             <div style={{ marginBottom: resource.sourceNote ? 10 : 12 }}>
               <OutboundLink href={resource.sourceUrl}>Access this OER</OutboundLink>

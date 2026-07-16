@@ -4,9 +4,11 @@ import { Button } from "../components/forms/Button.jsx";
 import { Select } from "../components/forms/Select.jsx";
 import { Checkbox } from "../components/forms/Checkbox.jsx";
 import { FilterChip } from "../components/forms/FilterChip.jsx";
+import { FilterGroup } from "../components/forms/FilterGroup.jsx";
 import { ResourceCard } from "../components/content/ResourceCard.jsx";
+import { InfoIcon } from "../components/content/InfoIcon.jsx";
 import { Badge } from "../components/feedback/Badge.jsx";
-import { RESOURCES, FACET_GROUPS, EXAMPLE_RESOURCE, getAggregatedStatus } from "../data/resources.js";
+import { RESOURCES, FACET_GROUPS, RUBRIC_DESCRIPTIONS, EXAMPLE_RESOURCE, getAggregatedStatus } from "../data/resources.js";
 
 const container = { maxWidth: 1280, margin: "0 auto" };
 
@@ -20,13 +22,18 @@ const SORTS = {
   institution: { label: "Institution (A–Z)", compare: (a, b) => a.institution.localeCompare(b.institution) },
 };
 
+function emptySelection() {
+  return {};
+}
+
 export function Browse() {
   const [query, setQuery] = useState("");
-  const [selected, setSelected] = useState({});
+  const [pendingSelected, setPendingSelected] = useState(emptySelection);
+  const [appliedSelected, setAppliedSelected] = useState(emptySelection);
   const [sort, setSort] = useState("default");
 
-  const toggleFacet = (groupKey, label) => {
-    setSelected((prev) => {
+  const togglePending = (groupKey, label) => {
+    setPendingSelected((prev) => {
       const current = new Set(prev[groupKey] || []);
       if (current.has(label)) current.delete(label);
       else current.add(label);
@@ -34,20 +41,34 @@ export function Browse() {
     });
   };
 
+  const applyFilters = () => setAppliedSelected(pendingSelected);
+
   const clearAll = () => {
-    setSelected({});
+    setPendingSelected(emptySelection());
+    setAppliedSelected(emptySelection());
     setQuery("");
   };
+
+  const clearGroup = (groupKey) => {
+    setPendingSelected((prev) => ({ ...prev, [groupKey]: new Set() }));
+    setAppliedSelected((prev) => ({ ...prev, [groupKey]: new Set() }));
+  };
+
+  const pendingCount = Object.values(pendingSelected).reduce((n, s) => n + (s ? s.size : 0), 0);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = RESOURCES.filter((r) => {
       if (getAggregatedStatus(r) == null) return false;
       for (const group of FACET_GROUPS) {
-        const active = selected[group.key];
+        const active = appliedSelected[group.key];
         if (active && active.size > 0) {
-          const value = r[group.key] || "Not specified";
-          if (!active.has(value)) return false;
+          if (group.key === "rubric") {
+            if (!r.rubricReviews.some((rr) => active.has(rr.rubric))) return false;
+          } else {
+            const value = r[group.key] || "Not specified";
+            if (!active.has(value)) return false;
+          }
         }
       }
       if (!q) return true;
@@ -60,11 +81,12 @@ export function Browse() {
     const compare = SORTS[sort].compare;
     if (compare) list = [...list].sort(compare);
     return list;
-  }, [query, selected, sort]);
+  }, [query, appliedSelected, sort]);
 
-  const activeChips = Object.entries(selected).flatMap(([groupKey, values]) =>
-    [...values].map((label) => ({ groupKey, label }))
-  );
+  const activeGroups = FACET_GROUPS.map((group) => {
+    const values = [...(appliedSelected[group.key] || [])];
+    return { group, values };
+  }).filter(({ values }) => values.length > 0);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
@@ -100,7 +122,7 @@ export function Browse() {
         <aside style={{ alignSelf: "start" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
             <h2 style={{ fontFamily: "var(--font-heading)", fontWeight: "var(--weight-display)", fontSize: 16, color: "var(--text-default)", margin: 0 }}>
-              Filters
+              Filter by
             </h2>
             <button
               type="button"
@@ -122,32 +144,52 @@ export function Browse() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
             {FACET_GROUPS.map((group) => (
-              <div key={group.key}>
-                <div
-                  style={{
-                    fontFamily: "var(--font-label)",
-                    fontSize: 13,
-                    fontWeight: "var(--weight-medium)",
-                    color: "var(--text-default)",
-                    marginBottom: 10,
-                  }}
-                >
-                  {group.label}
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-                  {group.options.map((opt) => (
+              <FilterGroup
+                key={group.key}
+                label={group.label}
+                options={group.options}
+                searchable={group.key === "primarySubject"}
+                renderOption={(opt) => (
+                  <div key={opt.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <Checkbox
-                      key={opt.label}
                       id={`${group.key}-${opt.label}`}
                       label={opt.label}
                       count={opt.count}
-                      checked={(selected[group.key] || new Set()).has(opt.label)}
-                      onChange={() => toggleFacet(group.key, opt.label)}
+                      checked={(pendingSelected[group.key] || new Set()).has(opt.label)}
+                      onChange={() => togglePending(group.key, opt.label)}
                     />
-                  ))}
-                </div>
-              </div>
+                    {group.key === "rubric" && RUBRIC_DESCRIPTIONS[opt.label] && (
+                      <InfoIcon title={RUBRIC_DESCRIPTIONS[opt.label]} />
+                    )}
+                  </div>
+                )}
+              />
             ))}
+          </div>
+
+          <div style={{ borderTop: "1px solid var(--border-default)", marginTop: 24, paddingTop: 20 }}>
+            <Button variant="primary" size="md" onClick={applyFilters} style={{ width: "100%", marginBottom: 12 }}>
+              Apply filters{pendingCount > 0 ? ` (${pendingCount})` : ""}
+            </Button>
+            <button
+              type="button"
+              onClick={clearAll}
+              style={{
+                display: "block",
+                width: "100%",
+                textAlign: "center",
+                fontFamily: "var(--font-label)",
+                fontSize: 13,
+                fontWeight: 500,
+                color: "var(--text-muted)",
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+              }}
+            >
+              ↺ Clear all filters
+            </button>
           </div>
         </aside>
 
@@ -173,6 +215,9 @@ export function Browse() {
               status={getAggregatedStatus(EXAMPLE_RESOURCE)}
               reviewCount={EXAMPLE_RESOURCE.rubricReviews.length}
               sourceHref={EXAMPLE_RESOURCE.sourceUrl}
+              variant="browse"
+              updated={EXAMPLE_RESOURCE.lastUpdated}
+              rubricReviews={EXAMPLE_RESOURCE.rubricReviews}
             />
             <div style={{ borderTop: "1px solid var(--border-default)", marginTop: 32 }} />
           </div>
@@ -208,17 +253,21 @@ export function Browse() {
             </div>
           </div>
 
-          {/* Active filters */}
-          {activeChips.length > 0 && (
+          {/* Active filters — reflects applied (not pending) selections */}
+          {activeGroups.length > 0 && (
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
-              {activeChips.map(({ groupKey, label }) => (
-                <FilterChip
-                  key={`${groupKey}-${label}`}
-                  label={label}
-                  selected
-                  onRemove={() => toggleFacet(groupKey, label)}
-                />
-              ))}
+              {activeGroups.map(({ group, values }) => {
+                const display =
+                  values.length > 2 ? `${values.slice(0, 1).join(", ")} +${values.length - 1}` : values.join(", ");
+                return (
+                  <FilterChip
+                    key={group.key}
+                    label={`${group.label}: ${display}`}
+                    selected
+                    onRemove={() => clearGroup(group.key)}
+                  />
+                );
+              })}
             </div>
           )}
 
@@ -237,6 +286,9 @@ export function Browse() {
                   status={getAggregatedStatus(r)}
                   reviewCount={r.rubricReviews.length}
                   sourceHref={r.sourceUrl}
+                  variant="browse"
+                  updated={r.lastUpdated}
+                  rubricReviews={r.rubricReviews}
                 />
               ))}
             </div>

@@ -57,6 +57,21 @@ const GENERAL = {
   info: "info",
 };
 
+// Compact labels for contexts with limited space (Browse's per-rubric review
+// tags, ResourceDetail's coverage table) — must stay in sync with `REVIEW`
+// above and `TONE` in ReviewTimeline.jsx whenever a status is added.
+export const SHORT_STATUS_LABEL = {
+  unreviewed: "Not reviewed",
+  submitted: "Submitted",
+  under_review: "Under review",
+  peer_reviewed: "Reviewed",
+  peer_reviewed_responded: "Responded",
+  peer_reviewed_revised: "Revised",
+  "not-revised": "Reviewed",
+  responded: "Responded",
+  revised: "Revised",
+};
+
 /**
  * StatusBadge — pill with a colored dot + label. Handles the three peer-review
  * states and the four general UI states. Never color-only (WCAG 1.4.1).

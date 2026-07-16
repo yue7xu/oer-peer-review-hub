@@ -33,9 +33,9 @@ function useStyles() {
  * RubricReviewSection — Layer 3 of the Single OER page: one full rubric's
  * review content. Renders whatever fields are present on `rubricReview` and
  * skips the rest — only `rubric` / `rubricId` / `status` are guaranteed.
- * Sub-block ids (`review-{rubricId}[-report|-response|-revision]`) are only
- * emitted when the corresponding content exists, matching RubricSidebarNav's
- * sub-link generation exactly.
+ * Sub-block ids (`review-{rubricId}[-report|-timeline|-review|-response|-revision]`)
+ * are only emitted when the corresponding content exists, matching
+ * RubricSidebarNav's sub-link generation exactly.
  */
 export function RubricReviewSection({ rubricReview }) {
   useStyles();
@@ -61,7 +61,11 @@ export function RubricReviewSection({ rubricReview }) {
         </div>
       )}
 
-      {rr.criteria && rr.criteria.length > 0 && <RatingsTable criteria={rr.criteria} />}
+      {rr.criteria && rr.criteria.length > 0 && (
+        <div className="oer-rubricsection__block" id={`review-${rr.rubricId}-review`}>
+          <RatingsTable criteria={rr.criteria} />
+        </div>
+      )}
 
       {rr.reviewReportUrl && (
         <div className="oer-rubricsection__block" id={`review-${rr.rubricId}-report`}>
@@ -75,7 +79,7 @@ export function RubricReviewSection({ rubricReview }) {
       )}
 
       {rr.timeline && rr.timeline.length > 0 && (
-        <div className="oer-rubricsection__block">
+        <div className="oer-rubricsection__block" id={`review-${rr.rubricId}-timeline`}>
           <h3 className="oer-rubricsection__subhead">Timeline</h3>
           <ReviewTimeline items={rr.timeline} />
         </div>

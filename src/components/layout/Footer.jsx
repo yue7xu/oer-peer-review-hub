@@ -44,30 +44,31 @@ export function Footer() {
               <Link to="/browse" style={footerLinkStyle}>
                 Browse resources
               </Link>
-              <Link to="/browse" style={footerLinkStyle}>
-                Disciplines
-              </Link>
+              <a href="/#how-it-works" style={footerLinkStyle}>
+                How peer review works
+              </a>
+              <a href="/#how-it-works" style={footerLinkStyle}>
+                Our process
+              </a>
             </div>
           </div>
           <div>
-            <div style={footerHeadingStyle}>Contribute</div>
+            <div style={footerHeadingStyle}>For</div>
             <div style={footerLinksStyle}>
-              <Link to="/for-authors" style={footerLinkStyle}>
-                For authors
-              </Link>
-              <Link to="/for-reviewers" style={footerLinkStyle}>
-                For reviewers
-              </Link>
+              <span style={footerLinkStyle}>Authors</span>
+              <span style={footerLinkStyle}>Reviewers</span>
+              <span style={footerLinkStyle}>Coordinators</span>
             </div>
           </div>
           <div>
             <div style={footerHeadingStyle}>About</div>
             <div style={footerLinksStyle}>
               <Link to="/community" style={footerLinkStyle}>
-                Community
+                Partner
               </Link>
+              <span style={footerLinkStyle}>Team</span>
               <Link to="/about" style={footerLinkStyle}>
-                About &amp; contact
+                Contact
               </Link>
             </div>
           </div>
@@ -77,17 +78,34 @@ export function Footer() {
             borderTop: "1px solid var(--border-default)",
             marginTop: 32,
             paddingTop: 20,
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 16,
-            flexWrap: "wrap",
-            fontFamily: "var(--font-label)",
-            fontSize: 13,
-            color: "var(--text-subtle)",
           }}
         >
-          <span>© 2026 OER Peer Review Hub</span>
-          <span>Content licensed CC BY 4.0 unless noted</span>
+          <a href="#top" style={{ ...footerLinkStyle, fontSize: 13 }}>
+            Back to top
+          </a>
+          <div
+            style={{
+              marginTop: 16,
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 16,
+              flexWrap: "wrap",
+              fontFamily: "var(--font-label)",
+              fontSize: 13,
+              color: "var(--text-subtle)",
+            }}
+          >
+            <span>© 2026 OER Peer Review Hub</span>
+            <span>Content licensed CC BY 4.0 unless noted</span>
+            <div style={{ display: "flex", gap: 16 }}>
+              <a href="#" style={footerLinkStyle}>
+                Online Terms of Service
+              </a>
+              <a href="#" style={footerLinkStyle}>
+                Privacy Statement
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

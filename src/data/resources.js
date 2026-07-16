@@ -631,23 +631,29 @@ const PARTNER_INSTITUTIONS_WITH_NO_OER_YET = [
 // but no current catalog entry is hosted there.
 const PARTNER_PLATFORMS_WITH_NO_OER_YET = ["OpenStax"];
 
+// Order matches the Figma sidebar (Discipline → Rubric → Material type →
+// Institution → Status → Language); Licence/Platform/Target learner have no
+// Figma-visible slot so they're kept (real data shouldn't be dropped) but
+// appended after the Figma-confirmed groups.
 export const FACET_GROUPS = [
   { key: "primarySubject", label: "Discipline", options: facetOptions(RESOURCES, "primarySubject") },
+  {
+    key: "rubric",
+    label: "Rubric",
+    options: CANONICAL_RUBRICS.map((label) => ({
+      label,
+      count: RESOURCES.filter((r) => r.rubricReviews.some((rr) => rr.rubric === label)).length,
+    })),
+  },
   {
     key: "materialKind",
     label: "Material type",
     options: facetOptions(RESOURCES, "materialKind", CANONICAL_MATERIAL_KINDS),
   },
-  { key: "license", label: "Licence", options: facetOptions(RESOURCES, "license", CANONICAL_LICENSES) },
   {
     key: "institution",
     label: "Institution",
     options: facetOptions(RESOURCES, "institution", PARTNER_INSTITUTIONS_WITH_NO_OER_YET),
-  },
-  {
-    key: "platform",
-    label: "Platform",
-    options: facetOptions(RESOURCES, "platform", PARTNER_PLATFORMS_WITH_NO_OER_YET),
   },
   {
     key: "statusLabel",
@@ -661,13 +667,29 @@ export const FACET_GROUPS = [
   // the source spreadsheet has no such columns — every resource is honestly
   // "Not specified" rather than a guessed value.
   { key: "language", label: "Language", options: facetOptions(RESOURCES, "language") },
-  { key: "targetLearner", label: "Target learner", options: facetOptions(RESOURCES, "targetLearner") },
+  { key: "license", label: "Licence", options: facetOptions(RESOURCES, "license", CANONICAL_LICENSES) },
   {
-    key: "rubric",
-    label: "Rubric",
-    options: CANONICAL_RUBRICS.map((label) => ({
-      label,
-      count: RESOURCES.filter((r) => r.rubricReviews.some((rr) => rr.rubric === label)).length,
-    })),
+    key: "platform",
+    label: "Platform",
+    options: facetOptions(RESOURCES, "platform", PARTNER_PLATFORMS_WITH_NO_OER_YET),
   },
+  { key: "targetLearner", label: "Target learner", options: facetOptions(RESOURCES, "targetLearner") },
 ];
+
+// First paragraph of each rubric's full write-up (see `6 new rubric md/` at
+// the repo root) — used as the InfoIcon tooltip wherever a rubric name
+// appears (Browse's Rubric filter, ResourceDetail's coverage table).
+export const RUBRIC_DESCRIPTIONS = {
+  Accessibility:
+    "Accessibility is a foundational dimension of OER quality, ensuring that all learners—regardless of ability, technology, or learning context—can perceive, navigate, and engage with course materials.",
+  "Copy Editing":
+    "Copy editing is a key component of OER quality, ensuring that materials are clear, consistent, and free of errors that can distract or confuse learners.",
+  Copyright:
+    "Copyright and licensing are essential dimensions of OER quality, ensuring that materials can be legally used, adapted, and shared.",
+  "Disciplinary Appropriateness":
+    "Disciplinary appropriateness ensures that OER align with the expectations, practices, and ways of knowing within a specific field of study.",
+  eLearning:
+    "eLearning design focuses on how OER are structured to support learning, guiding learners through content in ways that are clear, engaging, and aligned with learning goals.",
+  "Universal Design for Learning":
+    "Universal Design for Learning (UDL) focuses on designing learning experiences that are flexible and responsive to the diverse needs of learners.",
+};

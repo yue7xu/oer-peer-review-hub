@@ -1,9 +1,14 @@
-import React, { useState } from "react";
-import { Input } from "../components/forms/Input.jsx";
-import { Select } from "../components/forms/Select.jsx";
-import { Button } from "../components/forms/Button.jsx";
+import React from "react";
+import { ContactChannelList } from "../components/content/ContactChannelList.jsx";
+import { ContactFormCard } from "../components/content/ContactFormCard.jsx";
 
 const container = { maxWidth: 1280, margin: "0 auto" };
+
+const CONTACT_CHANNELS = [
+  { label: "General", email: "hello@oerhub.org" },
+  { label: "Institutions", email: "partners@oerhub.org" },
+  { label: "Press", email: "press@oerhub.org" },
+];
 
 const PRINCIPLES = [
   {
@@ -21,13 +26,6 @@ const PRINCIPLES = [
 ];
 
 export function About() {
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
   return (
     <>
       {/* Hero */}
@@ -77,90 +75,10 @@ export function About() {
               Questions about submitting, reviewing, or partnering? Send a note and the team will reply
               within two working days.
             </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div>
-                <div style={contactLabelStyle}>General</div>
-                <a href="mailto:hello@oerhub.org" style={{ fontSize: 16 }}>
-                  hello@oerhub.org
-                </a>
-              </div>
-              <div>
-                <div style={contactLabelStyle}>Institutions</div>
-                <a href="mailto:partners@oerhub.org" style={{ fontSize: 16 }}>
-                  partners@oerhub.org
-                </a>
-              </div>
-              <div>
-                <div style={contactLabelStyle}>Press</div>
-                <a href="mailto:press@oerhub.org" style={{ fontSize: 16 }}>
-                  press@oerhub.org
-                </a>
-              </div>
-            </div>
+            <ContactChannelList channels={CONTACT_CHANNELS} />
           </div>
 
-          <div
-            style={{
-              background: "var(--surface-default)",
-              boxShadow: "var(--shadow-subtle)",
-              borderRadius: "var(--radius-lg)",
-              padding: 32,
-            }}
-          >
-            {submitted ? (
-              <p style={{ fontSize: 16, lineHeight: 1.6, color: "var(--text-default)", margin: 0 }}>
-                Thanks — your message has been sent. The team will reply within two working days.
-              </p>
-            ) : (
-              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                  <Input label="Name" placeholder="Your name" required />
-                  <Input label="Email" type="email" placeholder="you@institution.edu" required />
-                </div>
-                <Select label="I'm reaching out as">
-                  <option>An educator</option>
-                  <option>An author</option>
-                  <option>A reviewer</option>
-                  <option>An institution</option>
-                  <option>Press / other</option>
-                </Select>
-                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <label
-                    style={{
-                      fontFamily: "var(--font-label)",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color: "var(--text-default)",
-                    }}
-                  >
-                    Message
-                  </label>
-                  <textarea
-                    placeholder="How can we help?"
-                    rows={5}
-                    required
-                    style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: 14,
-                      color: "var(--text-default)",
-                      background: "var(--surface-default)",
-                      border: "1px solid var(--border-default)",
-                      borderRadius: "var(--radius-sm)",
-                      padding: "9px 12px",
-                      resize: "vertical",
-                      width: "100%",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                </div>
-                <div>
-                  <Button variant="primary" size="lg" type="submit">
-                    Send message
-                  </Button>
-                </div>
-              </form>
-            )}
-          </div>
+          <ContactFormCard />
         </div>
       </section>
     </>
@@ -204,14 +122,4 @@ const h3Style = {
   lineHeight: 1.4,
   color: "var(--text-default)",
   margin: "0 0 8px",
-};
-
-const contactLabelStyle = {
-  fontFamily: "var(--font-label)",
-  fontSize: 12,
-  fontWeight: "var(--weight-medium)",
-  textTransform: "uppercase",
-  letterSpacing: "0.04em",
-  color: "var(--text-subtle)",
-  marginBottom: 3,
 };

@@ -21,14 +21,20 @@ function useStyles() {
   }
 }
 
-// Sub-links for one rubric group — must check the exact same fields
-// RubricReviewSection uses to decide what to render, so the nav never
+// Sub-links for one rubric group — Figma's three fixed stage labels
+// (Timeline / Review / Overall Author Revision). Must check the exact same
+// fields RubricReviewSection uses to decide what to render, so the nav never
 // links to a section that doesn't exist.
 function subLinksFor(rr) {
-  const links = [{ label: "Review Summary", href: `#review-${rr.rubricId}` }];
-  if (rr.reviewReportUrl) links.push({ label: "Review Report", href: `#review-${rr.rubricId}-report` });
-  if (rr.authorResponse) links.push({ label: "Author Response", href: `#review-${rr.rubricId}-response` });
-  if (rr.authorRevision) links.push({ label: "Author Revision", href: `#review-${rr.rubricId}-revision` });
+  const links = [];
+  if (rr.timeline && rr.timeline.length > 0) links.push({ label: "Timeline", href: `#review-${rr.rubricId}-timeline` });
+  if (rr.criteria && rr.criteria.length > 0) links.push({ label: "Review", href: `#review-${rr.rubricId}-review` });
+  if (rr.authorResponse || rr.authorRevision) {
+    links.push({
+      label: "Overall Author Revision",
+      href: rr.authorRevision ? `#review-${rr.rubricId}-revision` : `#review-${rr.rubricId}-response`,
+    });
+  }
   return links;
 }
 

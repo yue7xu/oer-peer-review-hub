@@ -1,42 +1,80 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/forms/Button.jsx";
 import { Input } from "../components/forms/Input.jsx";
-import { StatusBadge } from "../components/feedback/StatusBadge.jsx";
 import { ResourceCard } from "../components/content/ResourceCard.jsx";
 import { FilterChip } from "../components/forms/FilterChip.jsx";
-import { RESOURCES, FACET_GROUPS, getAggregatedStatus } from "../data/resources.js";
+import { RESOURCES, getAggregatedStatus } from "../data/resources.js";
 
 const container = { maxWidth: 1280, margin: "0 auto", padding: "0 32px" };
 
-const DISCIPLINES = FACET_GROUPS.find((g) => g.key === "primarySubject").options;
+const DISCIPLINES = [
+  "Statistics",
+  "Chemistry",
+  "Psychology",
+  "Health Sciences",
+  "Mathematics",
+  "Political Science",
+  "Biology",
+  "Computer Science",
+];
+
+const LIFECYCLE_STAGES = [
+  {
+    number: "01",
+    title: "Submit",
+    copy: "The author submits an OER link, selects the relevant rubrics, and chooses whether the review stays private or may later be published.",
+  },
+  {
+    number: "02",
+    title: "Expert Review",
+    copy: "A coordinator matches qualified reviewers. Reviewers evaluate the resource using structured criteria and evidence-linked comments, and OER can move forward with another independent round.",
+  },
+  {
+    number: "03",
+    title: "Feedback & Revision",
+    copy: "The author reviews structured feedback, revises the resource, or requests another independent round.",
+  },
+  {
+    number: "04",
+    title: "New Version Publish",
+    copy: "The completed resource is marked Peer Reviewed · Revised and full review loop has been closed. Adopters can confidently cite or reuse this OER.",
+  },
+];
+
+const QUALITY_STAGES = [
+  {
+    number: "#1",
+    title: "Expert Reviewers",
+    copy: "Experienced educators from leading institutions must go through pertaining so that they can be qualified to attend evaluation on each resource against rigorous standards.",
+  },
+  {
+    number: "#2",
+    title: "Structured Evaluation",
+    copy: "Six OpenEDPeer Review rubrics cover: Accessibility · Copy Editing · Copyright · Disciplinary Appropriateness · eLearning · Universal Design for Learning.",
+  },
+  {
+    number: "#3",
+    title: "Evidence-Based Feedback",
+    copy: "Reviewers connect comments directly to specific locations in the resource so authors know exactly what to improve. Each annotation comes with constructive feedback and actionable suggestions.",
+  },
+  {
+    number: "#4",
+    title: "Transparent Results",
+    copy: "Review summaries, criteria ratings, author responses and reviewer credentials* can be publicly shown.\n*names pre-training credentials. Public reviews may show name and institution.",
+  },
+];
 
 const FEATURED = RESOURCES.filter((r) => getAggregatedStatus(r) != null).slice(0, 3);
 
 export function Home() {
+  const navigate = useNavigate();
   return (
     <>
       {/* Hero */}
       <section style={{ background: "var(--surface-subtle)", borderBottom: "1px solid var(--border-default)" }}>
         <div style={{ ...container, padding: "80px 32px 72px" }}>
           <div style={{ maxWidth: 760 }}>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                fontFamily: "var(--font-label)",
-                fontSize: 13,
-                fontWeight: "var(--weight-medium)",
-                color: "var(--text-brand)",
-                background: "var(--brand-primary-subtle)",
-                padding: "6px 12px",
-                borderRadius: "var(--radius-full)",
-                marginBottom: 24,
-              }}
-            >
-              Transparent academic peer review for open resources
-            </div>
             <h1
               style={{
                 fontFamily: "var(--font-heading)",
@@ -48,34 +86,31 @@ export function Home() {
                 margin: "0 0 20px",
               }}
             >
-              Peer-reviewed open educational resources, in one trusted library.
+              Peer-reviewed OER, in one trusted library.
             </h1>
             <p style={{ fontSize: 20, lineHeight: 1.7, color: "var(--text-muted)", margin: "0 0 32px" }}>
-              Discover, evaluate, and share teaching materials vetted through an open, versioned review
-              process — so you can adopt with confidence and cite with clarity.
+              Discover peer-reviewed textbooks, courses, and materials vetted by pre-trained reviewers
+              using evidence-based rubrics developed with AAC&amp;U. Every resource meets rigorous quality
+              standards — so you can adopt with confidence, teach with impact, and cite with clarity.
             </p>
             <div style={{ display: "flex", gap: 12, alignItems: "stretch", maxWidth: 640, marginBottom: 20 }}>
               <div style={{ flex: 1 }}>
-                <Input placeholder="Search by title, author, discipline, or DOI…" aria-label="Search resources" />
+                <Input
+                  placeholder="Search by title, author, discipline, or institution…"
+                  aria-label="Search resources"
+                />
               </div>
               <Button variant="primary" size="lg" href="/browse">
                 Search
               </Button>
             </div>
-            <div
-              style={{
-                display: "flex",
-                gap: 24,
-                flexWrap: "wrap",
-                fontFamily: "var(--font-label)",
-                fontSize: 14,
-                color: "var(--text-subtle)",
-              }}
-            >
-              <span>Popular:</span>
-              <Link to="/browse">Introductory statistics</Link>
-              <Link to="/browse">Organic chemistry</Link>
-              <Link to="/browse">U.S. history</Link>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <Button variant="secondary" size="md" href="/browse">
+                Browse Peer-Reviewed OERs
+              </Button>
+              <Button variant="secondary" size="md" href="/#how-it-works">
+                Learn How It Works
+              </Button>
             </div>
           </div>
         </div>
@@ -93,7 +128,7 @@ export function Home() {
           }}
         >
           {[
-            ["12,480", "Reviewed resources"],
+            ["12,480", "Peer Reviewed resources"],
             ["3,200", "Active reviewers"],
             ["240", "Partner institutions"],
             ["38", "Disciplines"],
@@ -108,10 +143,23 @@ export function Home() {
         </div>
       </section>
 
-      {/* How review works */}
-      <section>
+      {/* The lifecycle */}
+      <section id="how-it-works">
         <div style={{ ...container, padding: "72px 32px" }}>
-          <div style={{ maxWidth: 640, marginBottom: 48 }}>
+          <div style={{ maxWidth: 700, marginBottom: 48 }}>
+            <div
+              style={{
+                fontFamily: "var(--font-label)",
+                fontSize: 13,
+                fontWeight: "var(--weight-semibold)",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: "var(--text-brand)",
+                marginBottom: 12,
+              }}
+            >
+              The Lifecycle
+            </div>
             <h2
               style={{
                 fontFamily: "var(--font-heading)",
@@ -123,37 +171,29 @@ export function Home() {
                 margin: "0 0 12px",
               }}
             >
-              How review works on the Hub
+              How O4PR Peer Review Works
             </h2>
             <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>
-              Every resource carries its full review history. A three-state status tells you at a glance
-              where each version stands — no digging required.
+              A concise overview of the complete open educational resource review lifecycle, from
+              submission to certification.
             </p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
-            {[
-              {
-                status: "not-revised",
-                title: "Reviewed, awaiting revision",
-                copy: "Reviewers have evaluated the submission and requested changes. The author has not yet responded.",
-              },
-              {
-                status: "responded",
-                title: "Author responded",
-                copy: "The author has addressed the feedback in writing. The response is public and awaiting re-review.",
-              },
-              {
-                status: "revised",
-                title: "Revised & re-published",
-                copy: "A new version incorporates the requested changes. Every prior version stays on the record.",
-              },
-            ].map((card) => (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, marginBottom: 24 }}>
+            {LIFECYCLE_STAGES.map((stage) => (
               <div
-                key={card.title}
+                key={stage.number}
                 style={{ background: "var(--surface-subtle)", borderRadius: "var(--radius-lg)", padding: 32 }}
               >
-                <div style={{ marginBottom: 16 }}>
-                  <StatusBadge status={card.status} />
+                <div
+                  style={{
+                    fontFamily: "var(--font-label)",
+                    fontSize: 13,
+                    fontWeight: "var(--weight-semibold)",
+                    color: "var(--text-subtle)",
+                    marginBottom: 16,
+                  }}
+                >
+                  {stage.number}
                 </div>
                 <h3
                   style={{
@@ -165,12 +205,76 @@ export function Home() {
                     margin: "0 0 8px",
                   }}
                 >
-                  {card.title}
+                  {stage.title}
                 </h3>
-                <p style={{ fontSize: 16, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>{card.copy}</p>
+                <p style={{ fontSize: 15, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>{stage.copy}</p>
               </div>
             ))}
           </div>
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-subtle)", margin: "0 0 4px" }}>
+            🔒 Private by default. Authors decide whether completed review results are published.
+          </p>
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-subtle)", margin: "0 0 28px" }}>
+            We also provide student review and self-review, but only reviews by qualified reviewers can get
+            badges.
+          </p>
+          <Button variant="primary" size="md" href="#">
+            See the detailed process →
+          </Button>
+        </div>
+      </section>
+
+      {/* How we ensure quality */}
+      <section style={{ background: "var(--surface-subtle)", borderTop: "1px solid var(--border-default)" }}>
+        <div style={{ ...container, padding: "72px 32px" }}>
+          <h2
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: "var(--weight-display)",
+              fontSize: 32,
+              lineHeight: 1.2,
+              letterSpacing: "-0.01em",
+              color: "var(--text-default)",
+              margin: "0 0 32px",
+            }}
+          >
+            How We Ensure Quality
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, marginBottom: 28 }}>
+            {QUALITY_STAGES.map((stage) => (
+              <div key={stage.number}>
+                <div
+                  style={{
+                    fontFamily: "var(--font-label)",
+                    fontSize: 13,
+                    fontWeight: "var(--weight-semibold)",
+                    color: "var(--text-brand)",
+                    marginBottom: 12,
+                  }}
+                >
+                  {stage.number}
+                </div>
+                <h3
+                  style={{
+                    fontFamily: "var(--font-heading)",
+                    fontWeight: "var(--weight-display)",
+                    fontSize: 18,
+                    lineHeight: 1.4,
+                    color: "var(--text-default)",
+                    margin: "0 0 8px",
+                  }}
+                >
+                  {stage.title}
+                </h3>
+                <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-muted)", margin: 0, whiteSpace: "pre-line" }}>
+                  {stage.copy}
+                </p>
+              </div>
+            ))}
+          </div>
+          <Button variant="secondary" size="md" href="/about">
+            Learn about the review standards →
+          </Button>
         </div>
       </section>
 
@@ -245,8 +349,13 @@ export function Home() {
             Browse by discipline
           </h2>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {DISCIPLINES.map((d) => (
-              <FilterChip key={d.label} label={d.label} count={d.count} />
+            {DISCIPLINES.map((label) => (
+              <FilterChip
+                key={label}
+                label={label}
+                onClick={() => navigate("/browse")}
+                onRemove={() => navigate("/browse")}
+              />
             ))}
           </div>
         </div>
@@ -280,8 +389,8 @@ export function Home() {
               Bring transparent review to your institution
             </h2>
             <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--color-on-ink-muted)", margin: 0 }}>
-              Join 240 universities and colleges contributing reviewed materials and reviewer time to the
-              open community.
+              Join 13 universities and colleges contributing reviewed materials and reviewer time to the
+              OER community.
             </p>
           </div>
           <div style={{ display: "flex", gap: 12 }}>
