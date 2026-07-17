@@ -2,11 +2,79 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/forms/Button.jsx";
 import { Input } from "../components/forms/Input.jsx";
+import { StatusBadge } from "../components/feedback/StatusBadge.jsx";
 import { ResourceCard } from "../components/content/ResourceCard.jsx";
 import { FilterChip } from "../components/forms/FilterChip.jsx";
 import { RESOURCES, getAggregatedStatus } from "../data/resources.js";
 
 const container = { maxWidth: 1280, margin: "0 auto", padding: "0 32px" };
+
+const iconProps = {
+  width: 18,
+  height: 18,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.6,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  "aria-hidden": true,
+};
+
+function UploadIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M12 3v12" />
+      <path d="m8 7 4-4 4 4" />
+      <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+    </svg>
+  );
+}
+function UsersIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  );
+}
+function RefreshIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+      <path d="M21 3v6h-6" />
+    </svg>
+  );
+}
+function CheckCircleIcon() {
+  return (
+    <svg {...iconProps}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+function LockIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      style={{ flex: "none" }}
+    >
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
 
 const DISCIPLINES = [
   "Statistics",
@@ -16,52 +84,60 @@ const DISCIPLINES = [
   "Mathematics",
   "Political Science",
   "Biology",
-  "Computer Science",
 ];
 
 const LIFECYCLE_STAGES = [
   {
     number: "01",
     title: "Submit",
+    icon: <UploadIcon />,
     copy: "The author submits an OER link, selects the relevant rubrics, and chooses whether the review stays private or may later be published.",
   },
   {
     number: "02",
     title: "Expert Review",
-    copy: "A coordinator matches qualified reviewers. Reviewers evaluate the resource using structured criteria and evidence-linked comments, and OER can move forward with another independent round.",
+    icon: <UsersIcon />,
+    copy: "A coordinator matches qualified reviewers. Reviewers evaluate the resource using structured rubrics and evidence-linked comments, and OER can been found in here with",
+    badge: { status: "peer_reviewed", label: "Peer Reviewed" },
   },
   {
     number: "03",
     title: "Feedback & Revision",
-    copy: "The author reviews structured feedback, revises the resource, or requests another independent round.",
+    icon: <RefreshIcon />,
+    copy: "The author receives structured feedback and may accept the review, revise the resource, or request another independent round.",
   },
   {
     number: "04",
     title: "New Version Publish",
-    copy: "The completed resource is marked Peer Reviewed · Revised and full review loop has been closed. Adopters can confidently cite or reuse this OER.",
+    icon: <CheckCircleIcon />,
+    copy: "The completed resource is marked",
+    badge: { status: "peer_reviewed_revised", label: "Peer Reviewed · Revised" },
+    after: "and full review loop has been closed. Adopters can confidently cite or remix this OER.",
   },
 ];
 
 const QUALITY_STAGES = [
   {
-    number: "#1",
+    number: "01",
     title: "Expert Reviewers",
     copy: "Experienced educators from leading institutions must go through pertaining so that they can be qualified to attend evaluation on each resource against rigorous standards.",
   },
   {
-    number: "#2",
+    number: "02",
     title: "Structured Evaluation",
-    copy: "Six OpenEDPeer Review rubrics cover: Accessibility · Copy Editing · Copyright · Disciplinary Appropriateness · eLearning · Universal Design for Learning.",
+    intro: "Six Open4PeerReview rubrics cover:",
+    list: ["accessibility", "copyright", "eLearning", "universal design for learning", "copy editing", "disciplinary appropriateness"],
   },
   {
-    number: "#3",
+    number: "03",
     title: "Evidence-Based Feedback",
-    copy: "Reviewers connect comments directly to specific locations in the resource so authors know exactly what to improve. Each annotation comes with constructive feedback and actionable suggestions.",
+    copy: "Reviewers connect comments directly to specific locations in the resource so authors know exactly what to improve. Each annotation will come with constructive feedback and actionable suggestions.",
   },
   {
-    number: "#4",
+    number: "04",
     title: "Transparent Results",
-    copy: "Review summaries, criteria ratings, author responses and reviewer credentials* can be publicly shown.\n*names pre-training credentials. Public reviews may show name and institution.",
+    copy: "Review summaries, criteria ratings, author responses and reviewer credentials* can be publicly visible.",
+    footnote: "*means pre-training credentials. Public reviewer may show name and institution.",
   },
 ];
 
@@ -128,10 +204,10 @@ export function Home() {
           }}
         >
           {[
-            ["12,480", "Peer Reviewed resources"],
-            ["3,200", "Active reviewers"],
-            ["240", "Partner institutions"],
-            ["38", "Disciplines"],
+            ["X", "Peer Reviewed resources"],
+            ["X", "Active reviewers"],
+            ["X", "Partner institutions"],
+            ["X", "Disciplines"],
           ].map(([value, label]) => (
             <div key={label}>
               <div style={{ fontFamily: "var(--font-heading)", fontWeight: "var(--weight-display)", fontSize: 32, color: "var(--text-default)" }}>
@@ -178,49 +254,80 @@ export function Home() {
               submission to certification.
             </p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, marginBottom: 24 }}>
-            {LIFECYCLE_STAGES.map((stage) => (
-              <div
-                key={stage.number}
-                style={{ background: "var(--surface-subtle)", borderRadius: "var(--radius-lg)", padding: 32 }}
-              >
-                <div
-                  style={{
-                    fontFamily: "var(--font-label)",
-                    fontSize: 13,
-                    fontWeight: "var(--weight-semibold)",
-                    color: "var(--text-subtle)",
-                    marginBottom: 16,
-                  }}
-                >
-                  {stage.number}
+
+          <div style={{ background: "var(--surface-subtle)", borderRadius: "var(--radius-lg)", padding: 32 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
+              {LIFECYCLE_STAGES.map((stage) => (
+                <div key={stage.number}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: "var(--radius-md)",
+                        background: "var(--surface-default)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "var(--text-default)",
+                      }}
+                    >
+                      {stage.icon}
+                    </div>
+                    <span
+                      style={{
+                        fontFamily: "var(--font-label)",
+                        fontSize: 13,
+                        fontWeight: "var(--weight-semibold)",
+                        color: "var(--text-subtle)",
+                      }}
+                    >
+                      {stage.number}
+                    </span>
+                  </div>
+                  <h3
+                    style={{
+                      fontFamily: "var(--font-heading)",
+                      fontWeight: "var(--weight-display)",
+                      fontSize: 20,
+                      lineHeight: 1.4,
+                      color: "var(--text-default)",
+                      margin: "0 0 8px",
+                    }}
+                  >
+                    {stage.title}
+                  </h3>
+                  <p style={{ fontSize: 15, lineHeight: 1.6, color: "var(--text-muted)", margin: stage.badge ? "0 0 10px" : 0 }}>
+                    {stage.copy}
+                  </p>
+                  {stage.badge && (
+                    <div style={{ marginBottom: stage.after ? 10 : 0 }}>
+                      <StatusBadge status={stage.badge.status}>{stage.badge.label}</StatusBadge>
+                    </div>
+                  )}
+                  {stage.after && (
+                    <p style={{ fontSize: 15, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>{stage.after}</p>
+                  )}
                 </div>
-                <h3
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontWeight: "var(--weight-display)",
-                    fontSize: 20,
-                    lineHeight: 1.4,
-                    color: "var(--text-default)",
-                    margin: "0 0 8px",
-                  }}
-                >
-                  {stage.title}
-                </h3>
-                <p style={{ fontSize: 15, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>{stage.copy}</p>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            <hr style={{ border: "none", borderTop: "1px solid var(--border-default)", margin: "28px 0 20px" }} />
+
+            <p style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, lineHeight: 1.6, color: "var(--text-subtle)", margin: "0 0 4px" }}>
+              <LockIcon /> Private by default. Authors decide whether completed review results are published.
+            </p>
+            <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-subtle)", margin: 0 }}>
+              We also provide student review and self-review, but only reviews by qualified reviewers can get
+              badges.
+            </p>
           </div>
-          <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-subtle)", margin: "0 0 4px" }}>
-            🔒 Private by default. Authors decide whether completed review results are published.
-          </p>
-          <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-subtle)", margin: "0 0 28px" }}>
-            We also provide student review and self-review, but only reviews by qualified reviewers can get
-            badges.
-          </p>
-          <Button variant="primary" size="md" href="#">
-            See the detailed process →
-          </Button>
+
+          <div style={{ marginTop: 28 }}>
+            <Button variant="primary" size="md" href="#">
+              See the detailed process →
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -235,24 +342,42 @@ export function Home() {
               lineHeight: 1.2,
               letterSpacing: "-0.01em",
               color: "var(--text-default)",
-              margin: "0 0 32px",
+              margin: 0,
             }}
           >
             How We Ensure Quality
           </h2>
+
+          <hr style={{ border: "none", borderTop: "1px solid var(--border-strong)", margin: "24px 0 32px" }} />
+
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, marginBottom: 28 }}>
             {QUALITY_STAGES.map((stage) => (
               <div key={stage.number}>
-                <div
-                  style={{
-                    fontFamily: "var(--font-label)",
-                    fontSize: 13,
-                    fontWeight: "var(--weight-semibold)",
-                    color: "var(--text-brand)",
-                    marginBottom: 12,
-                  }}
-                >
-                  {stage.number}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                  <div
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: "var(--radius-sm)",
+                      background: "var(--surface-default)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flex: "none",
+                    }}
+                  >
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--text-default)" }} />
+                  </div>
+                  <span
+                    style={{
+                      fontFamily: "var(--font-label)",
+                      fontSize: 13,
+                      fontWeight: "var(--weight-semibold)",
+                      color: "var(--text-subtle)",
+                    }}
+                  >
+                    {stage.number}
+                  </span>
                 </div>
                 <h3
                   style={{
@@ -266,9 +391,22 @@ export function Home() {
                 >
                   {stage.title}
                 </h3>
-                <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-muted)", margin: 0, whiteSpace: "pre-line" }}>
-                  {stage.copy}
-                </p>
+                {stage.intro && (
+                  <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-muted)", margin: "0 0 4px" }}>{stage.intro}</p>
+                )}
+                {stage.list && (
+                  <ul style={{ margin: 0, paddingLeft: 18, fontSize: 14, lineHeight: 1.6, color: "var(--text-muted)" }}>
+                    {stage.list.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                )}
+                {stage.copy && (
+                  <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>{stage.copy}</p>
+                )}
+                {stage.footnote && (
+                  <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-muted)", margin: "12px 0 0" }}>{stage.footnote}</p>
+                )}
               </div>
             ))}
           </div>
