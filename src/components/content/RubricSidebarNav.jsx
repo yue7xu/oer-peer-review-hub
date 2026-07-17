@@ -28,7 +28,7 @@ function useStyles() {
 function subLinksFor(rr) {
   const links = [];
   if (rr.timeline && rr.timeline.length > 0) links.push({ label: "Timeline", href: `#review-${rr.rubricId}-timeline` });
-  if (rr.criteria && rr.criteria.length > 0) links.push({ label: "Review", href: `#review-${rr.rubricId}-review` });
+  if (rr.reviewers && rr.reviewers.length > 0) links.push({ label: "Review", href: `#review-${rr.rubricId}-review` });
   if (rr.authorResponse || rr.authorRevision) {
     links.push({
       label: "Overall Author Revision",

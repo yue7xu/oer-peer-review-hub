@@ -1,28 +1,16 @@
 import React from "react";
 
 const CSS = `
-.oer-timeline { font-family: var(--font-body); display: flex; flex-direction: column; }
-.oer-tl-item { position: relative; display: grid; grid-template-columns: 22px 1fr; column-gap: 14px; }
-.oer-tl-rail { position: relative; display: flex; justify-content: center; }
-.oer-tl-line { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--border-default); }
-.oer-tl-item:first-child .oer-tl-line { top: 11px; }
-.oer-tl-item:last-child .oer-tl-line { bottom: auto; height: 11px; }
-.oer-tl-dot {
-  position: relative; z-index: 1; width: 14px; height: 14px; margin-top: 4px;
-  border-radius: var(--radius-full); box-sizing: border-box;
-  border: 3px solid var(--surface-default);
-}
+.oer-timeline { font-family: var(--font-body); display: flex; flex-direction: column; gap: 14px; }
+.oer-tl-item { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.oer-tl-dot { flex: none; width: 10px; height: 10px; border-radius: var(--radius-full); }
 .oer-tl-dot--info    { background: var(--feedback-info-icon); }
 .oer-tl-dot--warning { background: var(--feedback-warning-icon); }
 .oer-tl-dot--success { background: var(--feedback-success-icon); }
+.oer-tl-dot--error   { background: var(--feedback-error-icon); }
 .oer-tl-dot--muted   { background: var(--color-stone-strong); }
-.oer-tl-body { padding-bottom: 22px; min-width: 0; }
-.oer-tl-item:last-child .oer-tl-body { padding-bottom: 0; }
-.oer-tl-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.oer-tl-ver { font-family: var(--font-label); font-weight: var(--weight-semibold); font-size: 14px; color: var(--text-default); }
-.oer-tl-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-subtle); }
-.oer-tl-title { font-family: var(--font-label); font-weight: var(--weight-semibold); font-size: 14px; color: var(--text-default); margin: 6px 0 2px; }
-.oer-tl-note { font-size: 14px; line-height: 1.5; color: var(--text-muted); }
+.oer-tl-text { font-family: var(--font-label); font-weight: var(--weight-semibold); font-size: 14px; color: var(--text-default); }
+.oer-tl-date { font-family: var(--font-mono); font-size: 13px; color: var(--text-subtle); }
 `;
 
 let injected = false;
@@ -51,33 +39,28 @@ const TONE = {
   info: "info",
   warning: "warning",
   success: "success",
+  error: "error",
   muted: "muted",
 };
 
 /**
- * ReviewTimeline — the peer-review history across a resource's versions.
- * Each item: { version, date, status, title, note }.
+ * ReviewTimeline — a compact, single-line-per-event history of a rubric
+ * review (request → review activity → author response → revision publish).
+ * Each item: { text, date, tone }, where `tone` is either one of the
+ * peer-review status keys above or a bare tone name ("success" | "warning" |
+ * "info" | "error" | "muted").
  */
 export function ReviewTimeline({ items = [], className = "", ...rest }) {
   useStyles();
   return (
     <div className={`oer-timeline ${className}`.trim()} {...rest}>
       {items.map((it, i) => {
-        const tone = TONE[it.status] || "muted";
+        const tone = TONE[it.tone] || "muted";
         return (
           <div className="oer-tl-item" key={i}>
-            <div className="oer-tl-rail">
-              <span className="oer-tl-line" />
-              <span className={`oer-tl-dot oer-tl-dot--${tone}`} />
-            </div>
-            <div className="oer-tl-body">
-              <div className="oer-tl-head">
-                <span className="oer-tl-ver">{it.version}</span>
-                {it.date && <span className="oer-tl-date">{it.date}</span>}
-              </div>
-              {it.title && <div className="oer-tl-title">{it.title}</div>}
-              {it.note && <div className="oer-tl-note">{it.note}</div>}
-            </div>
+            <span className={`oer-tl-dot oer-tl-dot--${tone}`} aria-hidden="true" />
+            <span className="oer-tl-text">{it.text}</span>
+            {it.date && <span className="oer-tl-date">{it.date}</span>}
           </div>
         );
       })}

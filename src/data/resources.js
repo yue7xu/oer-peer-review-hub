@@ -114,6 +114,21 @@ function buildRealRubricReviews(rubricNames) {
   }));
 }
 
+// Counts a reviewer's per-criterion ratings into the three rubric buckets.
+// Shared by ReviewCoverageTable (rubric-level tally) and ReviewerCard
+// (per-reviewer tally shown when its card is collapsed).
+export function tallyRatings(criteria) {
+  if (!Array.isArray(criteria) || !criteria.length) return null;
+  const counts = { exceed: 0, exemplify: 0, "does not meet": 0 };
+  for (const c of criteria) {
+    const rating = (c.rating || "").toLowerCase();
+    if (rating.startsWith("exceed")) counts.exceed += 1;
+    else if (rating.startsWith("exemplif")) counts.exemplify += 1;
+    else if (rating.startsWith("does not meet")) counts["does not meet"] += 1;
+  }
+  return counts;
+}
+
 // Product-owner supplied mapping of which rubric(s) each real catalog entry
 // has been reviewed against ("Discipline" in the source instruction is
 // shorthand for the canonical "Disciplinary Appropriateness").
@@ -409,63 +424,162 @@ export const EXAMPLE_RESOURCE = {
   // status up to "Peer Reviewed · Revised" regardless of any single
   // rubric's own stage.
   revisedResourceUrl: "https://openstax.org/details/books/introductory-statistics-2e-v2",
-  // Three rubrics, three different lifecycle stages — demonstrates that
-  // each rubric review progresses independently of the others.
+  // Four rubrics at different lifecycle stages — demonstrates that each
+  // rubric review progresses independently of the others. Accessibility and
+  // eLearning also carry the full multi-reviewer, per-criterion detail (two
+  // reviewers apiece) to show the deeper accordion UI; Disciplinary
+  // Appropriateness and Copyright stay single-reviewer/lighter-detail to show
+  // that the same components degrade gracefully with less data.
   rubricReviews: [
     {
       rubric: "Accessibility",
       rubricId: "accessibility",
       status: "peer_reviewed_revised",
-      reviewers: [{ firstName: "Amara", lastName: "Nwosu", affiliation: "University of Cape Town · Statistics" }],
-      criteria: [
+      reviewers: [
         {
-          label: "Text Structure and Screen Reader Navigation",
-          standardDescription:
-            "Proper heading hierarchy with logical nesting and no skipped levels; lists use proper markup; reading order matches visual layout; navigation supports adaptive technology.",
-          rating: "exemplify",
-          comment: PENDING_COMMENT,
+          firstName: "Monica",
+          lastName: "Xu",
+          affiliation: "Carnegie Mellon University",
+          status: "peer_reviewed_revised",
+          criteria: [
+            {
+              label: "C1 · Text Structure and Screen Reader Navigation",
+              standardDescription:
+                "All text content includes proper heading hierarchy (H1–H6), with logical nesting and no skipped levels; lists use proper markup; reading order matches visual layout; page navigation coding supports adaptive technology.",
+              rating: "exemplify",
+              comment:
+                "No structural revisions required; heading hierarchy and reading order were already consistent. We did correct one mis-nested subheading (H3 under H1) in Chapters 9 and 14 during a routine audit.",
+            },
+            {
+              label: "C2 · Visual Design and Color",
+              standardDescription:
+                "Text and background colors meet WCAG 2.1 AA contrast ratios; information is not conveyed by color alone; font size is minimum 12pt for body text.",
+              rating: "exceed",
+              comment:
+                "No changes made. Contrast ratios and layout were deliberately tested against WCAG 2.1 AA during initial development, and we'll retain this design unless a future review flags a regression.",
+            },
+            {
+              label: "C3 · Alternative Text and Image Accessibility",
+              standardDescription:
+                "All informative images include descriptive alternative text; decorative images are marked with null alt text; charts and graphs include data tables or detailed descriptions.",
+              rating: "does not meet",
+              comment:
+                "We agree and have made substantial revisions. Alt text was rewritten for all 41 affected figures, distinguishing informative from decorative images, and we published an alt-text style guide in the instructor appendix.",
+            },
+            {
+              label: "C4 · Multimedia Accessibility",
+              standardDescription:
+                "Videos include accurate closed captions and transcripts; audio content provides complete transcripts; media players are keyboard accessible and compatible with assistive technology.",
+              rating: "exemplify",
+              comment:
+                "No revisions needed; embedded videos already meet captioning and transcript standards. We'll continue requiring captions and transcripts for any new multimedia submitted in future editions.",
+            },
+            {
+              label: "C5 · Interactive Elements and Forms",
+              standardDescription:
+                "All interactive elements are keyboard accessible; form fields have labels and instructions; error messages are descriptive and actionable; focus indicators are visible and logical.",
+              rating: "exemplify",
+              comment:
+                "Keyboard navigation and focus indicators confirmed adequate. We're not revising quiz error messaging this cycle, as it depends on a third-party plugin outside our editorial control; this is noted as a known limitation.",
+            },
+            {
+              label: "C6 · Table Structure and Data Presentation",
+              standardDescription:
+                "Data tables include proper header markup and scope attributes; tables are not used for layout; complex tables provide summaries or navigation aids.",
+              rating: "does not meet",
+              comment:
+                "We agree and have added data tables with proper header markup and scope attributes for all Chapter 2 charts, which previously lacked accompanying tables. Text now cross-references these tables instead of repeating content.",
+            },
+            {
+              label: "C7 · Link Quality and Context",
+              standardDescription:
+                "Link text is descriptive and meaningful out of context; links indicate when opening in new windows or different file formats; link purposes are clear from context or link text alone.",
+              rating: "exemplify",
+              comment:
+                "Link text is generally descriptive. We're retaining current citation-style links (e.g., DOIs) despite a suggestion to reword them, since standard academic citation format serves instructors better than accessibility-driven rephrasing here.",
+            },
+            {
+              label: "C8 · Technical Format and Compatibility",
+              standardDescription:
+                "Content is available in formats that preserve accessibility features; resources work across multiple devices and platforms; no additional software or plugins are required.",
+              rating: "exemplify",
+              comment: "No changes made; the resource already works across devices without requiring additional plugins or software.",
+            },
+          ],
         },
         {
-          label: "Alternative Text and Image Accessibility",
-          standardDescription:
-            "All informative images include descriptive alternative text; decorative images are marked null; charts and graphs include data tables or detailed descriptions.",
-          rating: "does not meet",
-          comment: PENDING_COMMENT,
+          firstName: "Thoughtful",
+          lastName: "Fig",
+          anonymous: true,
+          status: "peer_reviewed_revised",
+          criteria: [
+            { label: "C1 · Text Structure and Screen Reader Navigation", rating: "exemplify", comment: "Heading structure and reading order are sound; no further action needed." },
+            { label: "C2 · Visual Design and Color", rating: "exemplify", comment: "Contrast and layout meet the standard; consistent with WCAG 2.1 AA." },
+            { label: "C3 · Alternative Text and Image Accessibility", rating: "exceed", comment: "Alt text goes beyond description, naming the statistical relationship each figure illustrates." },
+            { label: "C4 · Multimedia Accessibility", rating: "exemplify", comment: "Captions and transcripts present and accurate on all reviewed media." },
+            { label: "C5 · Interactive Elements and Forms", rating: "exemplify", comment: "Form fields and interactive elements are keyboard accessible with clear labels." },
+            { label: "C6 · Table Structure and Data Presentation", rating: "does not meet", comment: "Several data tables still lack header markup and scope attributes; recommend addressing before next edition." },
+            { label: "C7 · Link Quality and Context", rating: "exemplify", comment: "Link text is descriptive; purpose is clear from context." },
+            { label: "C8 · Technical Format and Compatibility", rating: "exemplify", comment: "Verified across desktop and mobile; no plugins required." },
+          ],
         },
       ],
       reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-statistics/accessibility",
       timeline: [
-        {
-          version: "Version 2",
-          date: "2026-03-14",
-          status: "peer_reviewed_revised",
-          title: "Revised & re-published",
-          note: "Author incorporated all requested accessibility changes.",
-        },
-        {
-          version: "Author response",
-          date: "2026-01-22",
-          status: "peer_reviewed_responded",
-          title: "Author responded to review",
-          note: "Rachel Chen committed to rewriting alt text for the flagged figures.",
-        },
-        {
-          version: "Version 1",
-          date: "2025-11-02",
-          status: "peer_reviewed",
-          title: "Accessibility review completed",
-          note: "Dr. Amara Nwosu completed the Accessibility rubric review; recommended revisions to figure alt text.",
-        },
+        { text: "Author revised & re-published V2", date: "2026-03-14", tone: "success" },
+        { text: "Monica Xu and Thoughtful Fig reviews on V1 responded by Author", date: "2026-01-22", tone: "warning" },
+        { text: "V1 review completed by Monica Xu", date: "2025-12-27", tone: "info" },
+        { text: "V1 review completed by Thoughtful Fig", date: "2025-12-25", tone: "info" },
+        { text: "V1 review started by Thoughtful Fig", date: "2025-11-16", tone: "info" },
+        { text: "V1 review started by Monica Xu", date: "2025-11-12", tone: "info" },
+        { text: "V1 request review by Author", date: "2025-11-02", tone: "error" },
       ],
-      authorResponse: {
-        date: "2026-01-22",
-        text: "Thank you for this careful accessibility review. We will rewrite descriptions for the flagged figures to name the statistical relationship shown rather than the chart type alone.",
-      },
       authorRevision: {
         date: "2026-03-14",
-        versionLabel: "Version 2",
+        versionLabel: "Version 1 - 2",
         summary:
-          "Rewrote alt text for all flagged figures; added a document-wide alt-text style guide to the reproducible-analysis appendix.",
+          "We agree with the reviewers' findings on alternative text and table structure, and have made substantial revisions to address both. We rewrote alt text for all 41 figures lacking adequate description, distinguishing informative from decorative images, and added data tables with proper header markup to all Chapter 2 charts. We've also published an alt-text style guide in the instructor appendix to guide future contributions. Feedback on link phrasing and quiz error messaging was reviewed but not adopted in this cycle, for reasons noted above; all other criteria required no changes.",
+      },
+    },
+    {
+      rubric: "eLearning",
+      rubricId: "elearning",
+      status: "peer_reviewed",
+      reviewers: [
+        {
+          firstName: "Constructive",
+          lastName: "Kiwi",
+          anonymous: true,
+          status: "peer_reviewed",
+          criteria: [
+            { label: "C1 · Usability and Technical Functionality", rating: "exemplify", comment: "Interface is intuitive and navigation is consistent; core features work reliably across browsers." },
+            { label: "C2 · Technical Support and Documentation", rating: "exemplify", comment: "Support channels and documentation are solid; instructor troubleshooting guidance could go further." },
+            { label: "C3 · Mobile Accessibility and Cross-Platform Documentation", rating: "exemplify", comment: "Functions effectively across desktop and mobile with minimal difference in experience." },
+            {
+              label: "C4 · Learning Management System (LMS) Integration and Interoperability",
+              rating: "does not meet",
+              comment: "Supplementary quizzes do not support LTI-compliant grade passback and require students to create separate accounts.",
+            },
+            { label: "C5 · Data Privacy, Security, and Ownership", rating: "exemplify", comment: "Privacy policy is clear and accessible; student data is not shared with third parties." },
+            { label: "C6 · Cost, Sustainability, and Resource Requirements", rating: "exceed", comment: "All materials remain free with no hidden costs or required upgrades." },
+            { label: "C9 · Pedagogical Effectiveness and Learning Enhancement", rating: "exemplify", comment: "Features align with the resource's learning objectives and support higher-order thinking." },
+            { label: "C10 · Learning Analytics and Customization", rating: "exemplify", comment: "Instructors can customize the tool to their course context; engagement data is presented clearly." },
+          ],
+        },
+      ],
+      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-statistics/elearning",
+      timeline: [
+        { text: "Author revised & re-published V2", date: "2026-03-14", tone: "success" },
+        { text: "Constructive Kiwi review on V1 responded by Author", date: "2026-01-22", tone: "warning" },
+        { text: "V1 review completed by Constructive Kiwi", date: "2025-12-30", tone: "info" },
+        { text: "V1 review started by Constructive Kiwi", date: "2025-11-16", tone: "info" },
+        { text: "V1 request review by Author", date: "2025-11-02", tone: "error" },
+      ],
+      authorRevision: {
+        date: "2026-03-14",
+        versionLabel: "Version 1 - 2",
+        summary:
+          "We agree with the reviewer's finding on LMS Integration and Interoperability and have made targeted revisions. The textbook's supplementary quizzes did not support LTI-compliant grade passback, so we partnered with our LMS provider to enable single sign-on and gradebook syncing without requiring students to create separate accounts. We also expanded troubleshooting documentation for instructors following feedback on Technical Support. Cost, Sustainability, and Resource Requirements remains rated Exceeds, as all materials stay free with no hidden fees. Mobile Accessibility, Usability, Data Privacy, Pedagogical Effectiveness, and Learning Analytics required no changes, as reviewers confirmed these already meet standards.",
       },
     },
     {
@@ -473,81 +587,72 @@ export const EXAMPLE_RESOURCE = {
       rubricId: "disciplinary-appropriateness",
       status: "peer_reviewed_responded",
       reviewers: [
-        { firstName: "Liam", lastName: "Bergström", affiliation: "Uppsala University · Mathematics Education" },
-      ],
-      criteria: [
         {
-          label: "Content Accuracy and Validity",
-          standardDescription:
-            "All content is factually accurate with reliable, well-supported information; facts and data reflect current disciplinary understanding.",
-          rating: "exemplify",
-          comment: PENDING_COMMENT,
-        },
-        {
-          label: "College-Level Appropriateness and Cognitive Demand",
-          standardDescription:
-            "Demonstrates appropriate intellectual complexity for college students; encourages critical thinking with suitable cognitive demand for the discipline.",
-          rating: "exemplify",
-          comment: PENDING_COMMENT,
+          firstName: "Liam",
+          lastName: "Bergström",
+          affiliation: "Uppsala University · Mathematics Education",
+          status: "peer_reviewed_responded",
+          criteria: [
+            {
+              label: "Content Accuracy and Validity",
+              standardDescription:
+                "All content is factually accurate with reliable, well-supported information; facts and data reflect current disciplinary understanding.",
+              rating: "exemplify",
+              comment: PENDING_COMMENT,
+            },
+            {
+              label: "College-Level Appropriateness and Cognitive Demand",
+              standardDescription:
+                "Demonstrates appropriate intellectual complexity for college students; encourages critical thinking with suitable cognitive demand for the discipline.",
+              rating: "exemplify",
+              comment: PENDING_COMMENT,
+            },
+          ],
         },
       ],
       reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-statistics/disciplinary-appropriateness",
       timeline: [
-        {
-          version: "Author response",
-          date: "2026-01-22",
-          status: "peer_reviewed_responded",
-          title: "Author responded to review",
-          note: "Rachel Chen submitted a response addressing notation-consistency feedback.",
-        },
-        {
-          version: "Version 1",
-          date: "2025-11-09",
-          status: "peer_reviewed",
-          title: "Disciplinary Appropriateness review completed",
-          note: "Prof. Liam Bergström completed the review; recommended standardizing proportion notation.",
-        },
+        { text: "Author responded to review", date: "2026-01-22", tone: "warning" },
+        { text: "Disciplinary Appropriateness review completed by Liam Bergström", date: "2025-11-09", tone: "info" },
+        { text: "V1 request review by Author", date: "2025-10-20", tone: "error" },
       ],
       authorResponse: {
         date: "2026-01-22",
         text: "We agree the proportion notation drifted between chapters and will standardize it in the next revision cycle.",
       },
       // No authorRevision yet — this rubric hasn't progressed to "revised"
-      // independently of Accessibility above.
+      // independently of Accessibility/eLearning above.
     },
     {
       rubric: "Copyright",
       rubricId: "copyright",
       status: "peer_reviewed",
       reviewers: [
-        { firstName: "Samuel", lastName: "Okonkwo", affiliation: "Ohio State University · Copyright & Scholarly Communication" },
-      ],
-      criteria: [
         {
-          label: "Original Content Licensing",
-          standardDescription:
-            "All originally created content is clearly licensed under an appropriate open license; the license is prominently displayed and applied consistently throughout.",
-          rating: "exemplify",
-          comment: PENDING_COMMENT,
-        },
-        {
-          label: "Attribution Practices",
-          standardDescription:
-            "Proper attribution is provided for all third-party content, including creator, title, source, license type, and any modifications made.",
-          rating: "exceed",
-          comment: PENDING_COMMENT,
+          firstName: "Samuel",
+          lastName: "Okonkwo",
+          affiliation: "Ohio State University · Copyright & Scholarly Communication",
+          status: "peer_reviewed",
+          criteria: [
+            {
+              label: "Original Content Licensing",
+              standardDescription:
+                "All originally created content is clearly licensed under an appropriate open license; the license is prominently displayed and applied consistently throughout.",
+              rating: "exemplify",
+              comment: PENDING_COMMENT,
+            },
+            {
+              label: "Attribution Practices",
+              standardDescription:
+                "Proper attribution is provided for all third-party content, including creator, title, source, license type, and any modifications made.",
+              rating: "exceed",
+              comment: PENDING_COMMENT,
+            },
+          ],
         },
       ],
       reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-statistics/copyright",
-      timeline: [
-        {
-          version: "Version 1",
-          date: "2025-11-15",
-          status: "peer_reviewed",
-          title: "Copyright review completed",
-          note: "Dr. Samuel Okonkwo completed the Copyright rubric review; no revisions requested.",
-        },
-      ],
+      timeline: [{ text: "Copyright review completed by Samuel Okonkwo", date: "2025-11-15", tone: "info" }],
       // No authorResponse/authorRevision — nothing to respond to yet.
     },
   ],

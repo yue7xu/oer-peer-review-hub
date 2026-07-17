@@ -1,7 +1,7 @@
 import React from "react";
 import { StatusBadge, SHORT_STATUS_LABEL } from "../feedback/StatusBadge.jsx";
 import { InfoIcon } from "./InfoIcon.jsx";
-import { RUBRIC_DESCRIPTIONS } from "../../data/resources.js";
+import { RUBRIC_DESCRIPTIONS, tallyRatings } from "../../data/resources.js";
 
 const CSS = `
 .oer-coverage { width: 100%; border-collapse: collapse; }
@@ -30,19 +30,13 @@ function useStyles() {
   }
 }
 
-// "Exceed / Exemplifies / Does not meet" tally — only real when a rubric
-// review carries per-criterion ratings (currently just EXAMPLE_RESOURCE).
-// Real catalog entries honestly show "—" rather than a fabricated count.
+// "Exceed / Exemplifies / Does not meet" tally, from the first (primary)
+// reviewer's per-criterion ratings — only real when that reviewer carries
+// them (currently just EXAMPLE_RESOURCE). Real catalog entries honestly
+// show "—" rather than a fabricated count.
 function tallyFor(rubricReview) {
-  const criteria = rubricReview.criteria;
-  if (!Array.isArray(criteria) || !criteria.length) return null;
-  const counts = { exceed: 0, exemplify: 0, "does not meet": 0 };
-  for (const c of criteria) {
-    const rating = (c.rating || "").toLowerCase();
-    if (rating.startsWith("exceed")) counts.exceed += 1;
-    else if (rating.startsWith("exemplif")) counts.exemplify += 1;
-    else if (rating.startsWith("does not meet")) counts["does not meet"] += 1;
-  }
+  const counts = tallyRatings(rubricReview.reviewers && rubricReview.reviewers[0] && rubricReview.reviewers[0].criteria);
+  if (!counts) return null;
   return `${counts.exceed} / ${counts.exemplify} / ${counts["does not meet"]}`;
 }
 
