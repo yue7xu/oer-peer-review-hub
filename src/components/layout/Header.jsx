@@ -5,7 +5,7 @@ import { Button } from "../forms/Button.jsx";
 const NAV_LINKS = [
   { to: "/", label: "Home" },
   { to: "/browse", label: "Browse" },
-  { to: "/#how-it-works", label: "Solution" },
+  { to: "/solution", label: "Solution" },
   { to: "/community", label: "Community" },
   { to: "/about", label: "About" },
 ];
@@ -53,29 +53,19 @@ export function Header() {
             fontSize: 14,
           }}
         >
-          {NAV_LINKS.map((link) =>
-            link.to.startsWith("/#") ? (
-              <a
-                key={link.to}
-                href={link.to}
-                style={{ color: "var(--text-muted)", fontWeight: "var(--weight-medium)" }}
-              >
-                {link.label}
-              </a>
-            ) : (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.to === "/"}
-                style={({ isActive }) => ({
-                  color: isActive ? "var(--text-default)" : "var(--text-muted)",
-                  fontWeight: "var(--weight-medium)",
-                })}
-              >
-                {link.label}
-              </NavLink>
-            )
-          )}
+          {NAV_LINKS.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.to === "/"}
+              style={({ isActive }) => ({
+                color: isActive ? "var(--text-default)" : "var(--text-muted)",
+                fontWeight: "var(--weight-medium)",
+              })}
+            >
+              {link.label}
+            </NavLink>
+          ))}
         </nav>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <Button variant="secondary" size="md" href="/">
