@@ -1,14 +1,9 @@
 import React from "react";
 import { ContactChannelList } from "../components/content/ContactChannelList.jsx";
 import { ContactFormCard } from "../components/content/ContactFormCard.jsx";
+import { CONTACT_CHANNELS } from "../data/contact.js";
 
 const container = { maxWidth: 1280, margin: "0 auto" };
-
-const CONTACT_CHANNELS = [
-  { label: "General", email: "hello@oerhub.org" },
-  { label: "Institutions", email: "partners@oerhub.org" },
-  { label: "Press", email: "press@oerhub.org" },
-];
 
 const PRINCIPLES = [
   {

@@ -4,14 +4,9 @@ import { InstitutionCard } from "../components/content/InstitutionCard.jsx";
 import { ProjectCard } from "../components/content/ProjectCard.jsx";
 import { ContactChannelList } from "../components/content/ContactChannelList.jsx";
 import { ContactFormCard } from "../components/content/ContactFormCard.jsx";
+import { CONTACT_CHANNELS } from "../data/contact.js";
 
 const container = { maxWidth: 1280, margin: "0 auto" };
-
-const CONTACT_CHANNELS = [
-  { label: "General", email: "placeholder.hello@oerhub.org" },
-  { label: "Institutions", email: "placeholder.partners@oerhub.org" },
-  { label: "Press", email: "placeholder.press@oerhub.org" },
-];
 
 const INSTITUTIONS = [
   { name: "Open Learning Initiative", initials: "OLI", location: "Pittsburgh, Pennsylvania" },
