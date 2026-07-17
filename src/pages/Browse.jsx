@@ -7,6 +7,7 @@ import { FilterChip } from "../components/forms/FilterChip.jsx";
 import { FilterGroup } from "../components/forms/FilterGroup.jsx";
 import { ResourceCard } from "../components/content/ResourceCard.jsx";
 import { InfoIcon } from "../components/content/InfoIcon.jsx";
+import { EmptyState } from "../components/content/EmptyState.jsx";
 import { Badge } from "../components/feedback/Badge.jsx";
 import { RESOURCES, FACET_GROUPS, RUBRIC_DESCRIPTIONS, EXAMPLE_RESOURCE, getAggregatedStatus } from "../data/resources.js";
 
@@ -120,7 +121,16 @@ export function Browse() {
       >
         {/* Filter sidebar */}
         <aside style={{ alignSelf: "start" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              paddingBottom: 16,
+              marginBottom: 20,
+              borderBottom: "1px solid var(--border-default)",
+            }}
+          >
             <h2 style={{ fontFamily: "var(--font-heading)", fontWeight: "var(--weight-display)", fontSize: 16, color: "var(--text-default)", margin: 0 }}>
               Filter by
             </h2>
@@ -136,6 +146,7 @@ export function Browse() {
                 border: "none",
                 padding: 0,
                 cursor: "pointer",
+                textDecoration: "underline",
               }}
             >
               Clear all
@@ -143,28 +154,44 @@ export function Browse() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-            {FACET_GROUPS.map((group) => (
-              <FilterGroup
-                key={group.key}
-                label={group.label}
-                options={group.options}
-                searchable={group.key === "primarySubject"}
-                renderOption={(opt) => (
-                  <div key={opt.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {FACET_GROUPS.map((group) => {
+              // Discipline/Rubric/Material-type get a right-aligned bare count
+              // (Figma's primary facets); everything else keeps the count
+              // inline in parens next to the label.
+              const rightAlignCount = ["primarySubject", "rubric", "materialKind"].includes(group.key);
+              const maxVisible = group.key === "rubric" ? group.options.length : group.key === "institution" ? 10 : 5;
+              return (
+                <FilterGroup
+                  key={group.key}
+                  label={group.label}
+                  options={group.options}
+                  searchable={group.key === "primarySubject"}
+                  maxVisible={maxVisible}
+                  defaultOpen={group.key !== "language"}
+                  selectedCount={(pendingSelected[group.key] || new Set()).size}
+                  renderOption={(opt) => (
                     <Checkbox
+                      key={opt.label}
                       id={`${group.key}-${opt.label}`}
-                      label={opt.label}
+                      label={
+                        group.key === "rubric" && RUBRIC_DESCRIPTIONS[opt.label] ? (
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                            {opt.label}
+                            <InfoIcon title={RUBRIC_DESCRIPTIONS[opt.label]} />
+                          </span>
+                        ) : (
+                          opt.label
+                        )
+                      }
                       count={opt.count}
+                      countPosition={rightAlignCount ? "right" : "inline"}
                       checked={(pendingSelected[group.key] || new Set()).has(opt.label)}
                       onChange={() => togglePending(group.key, opt.label)}
                     />
-                    {group.key === "rubric" && RUBRIC_DESCRIPTIONS[opt.label] && (
-                      <InfoIcon title={RUBRIC_DESCRIPTIONS[opt.label]} />
-                    )}
-                  </div>
-                )}
-              />
-            ))}
+                  )}
+                />
+              );
+            })}
           </div>
 
           <div style={{ borderTop: "1px solid var(--border-default)", marginTop: 24, paddingTop: 20 }}>
@@ -194,7 +221,7 @@ export function Browse() {
         </aside>
 
         {/* Results */}
-        <main>
+        <main style={{ borderTop: "1px solid var(--border-default)", paddingTop: 24 }}>
           {/* Example resource — illustrates the fully-reviewed card + detail
               page. Pinned above the real catalog, clearly labeled; not part
               of the count or filters below. */}
@@ -257,12 +284,17 @@ export function Browse() {
           {activeGroups.length > 0 && (
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
               {activeGroups.map(({ group, values }) => {
-                const display =
-                  values.length > 2 ? `${values.slice(0, 1).join(", ")} +${values.length - 1}` : values.join(", ");
+                const joined = values.join(", ");
+                const display = values.length > 1 && joined.length > 20 ? `${values[0]} +${values.length - 1}` : joined;
                 return (
                   <FilterChip
                     key={group.key}
-                    label={`${group.label}: ${display}`}
+                    label={
+                      <>
+                        <span style={{ color: "var(--text-subtle)" }}>{group.label}</span>{" "}
+                        <span style={{ color: "var(--text-default)", fontWeight: "var(--weight-semibold)" }}>{display}</span>
+                      </>
+                    }
                     selected
                     onRemove={() => clearGroup(group.key)}
                   />
@@ -293,18 +325,15 @@ export function Browse() {
               ))}
             </div>
           ) : (
-            <div
-              style={{
-                padding: 40,
-                textAlign: "center",
-                background: "var(--surface-subtle)",
-                borderRadius: "var(--radius-lg)",
-                color: "var(--text-muted)",
-                fontSize: 15,
-              }}
-            >
-              No resources match these filters. Try clearing a filter or broadening your search.
-            </div>
+            <EmptyState
+              title="No OERs match your filters"
+              message="Try removing a filter, or clear them all."
+              action={
+                <Button variant="secondary" size="md" onClick={clearAll}>
+                  ↺ Clear filters
+                </Button>
+              }
+            />
           )}
         </main>
       </div>

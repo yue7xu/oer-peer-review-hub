@@ -8,6 +8,8 @@ const CSS = `
   font-family: var(--font-label); font-size: 13px; font-weight: var(--weight-medium);
   color: var(--text-default); text-align: left;
 }
+.oer-fgroup__head-right { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+.oer-fgroup__summary { font-weight: var(--weight-regular); color: var(--text-subtle); }
 .oer-fgroup__chevron { display: inline-flex; flex: none; color: var(--text-subtle); transition: transform 150ms ease; }
 .oer-fgroup__chevron--open { transform: rotate(180deg); }
 .oer-fgroup__body { display: flex; flex-direction: column; gap: 9px; margin-top: 12px; }
@@ -41,6 +43,7 @@ export function FilterGroup({
   searchable = false,
   maxVisible = 5,
   defaultOpen = true,
+  selectedCount = 0,
 }) {
   useStyles();
   const [open, setOpen] = useState(defaultOpen);
@@ -60,10 +63,13 @@ export function FilterGroup({
     <div>
       <button type="button" className="oer-fgroup__head" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         {label}
-        <span className={`oer-fgroup__chevron${open ? " oer-fgroup__chevron--open" : ""}`} aria-hidden="true">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <span className="oer-fgroup__head-right">
+          {!open && selectedCount > 0 && <span className="oer-fgroup__summary">{selectedCount} selected</span>}
+          <span className={`oer-fgroup__chevron${open ? " oer-fgroup__chevron--open" : ""}`} aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
         </span>
       </button>
       {open && (
