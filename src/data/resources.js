@@ -391,18 +391,19 @@ export const RESOURCES = RAW.map((r) => ({
 // documentation domain (RFC 2606, never resolves) — both intentionally
 // non-resolving placeholders, not real links.
 const EXAMPLE_RAW = {
-  title: "Introductory Statistics with Applications",
-  authors: "Rachel Chen; Ngozi Okafor",
-  primarySubject: "Mathematics",
-  additionalSubjects: "Statistics",
-  institution: "Metro State University",
+  title: "Introduction to Psychology 2e",
+  authors: "Julie Lazzara",
+  primarySubject: "Psychology",
+  additionalSubjects: "Data Science",
+  institution: "OpenStax",
   bookInfo: "Textbook",
   abstract:
-    "This calculus-optional first course in statistics covers descriptive statistics, probability, sampling distributions, estimation, and hypothesis testing. Each chapter builds from a real question drawn from public-health, education, or social-science data, so students meet inference as a tool for answering questions rather than as a set of formulas.\n\nThe second edition adds a reproducible-analysis appendix, expanded exercises on study design, and accessibility improvements to every figure. It is suitable for a one-semester general-education or service course, and pairs with openly licensed companion datasets and a slide deck.",
+    "Psychology 2e is designed to meet scope and sequence requirements for the single-semester introduction to psychology course. The book offers a comprehensive treatment of core concepts, grounded in both classic studies and current and emerging research. The text also includes coverage of the DSM-5 in examinations of psychological disorders. Psychology incorporates discussions that reflect the diversity within the discipline, as well as the diversity of cultures and communities across the globe.",
   license: "CC BY 4.0",
-  publishDate: "2020 (original upload); 2nd edition March 2026",
-  lastUpdated: "14 March 2026",
-  sourceUrl: "https://openstax.org/",
+  language: "English",
+  publishDate: "2020-04-22",
+  lastUpdated: "2026-04-23",
+  sourceUrl: "https://openstax.org/details/books/psychology-2e",
   doi: "10.5555/oer.example.0001",
 };
 
@@ -417,13 +418,16 @@ export const EXAMPLE_RESOURCE = {
   additionalSubjectList: splitList(EXAMPLE_RAW.additionalSubjects),
   materialKind: materialKind(EXAMPLE_RAW.bookInfo),
   platform: platformFromUrl(EXAMPLE_RAW.sourceUrl),
-  year: leadYear(EXAMPLE_RAW.publishDate, EXAMPLE_RAW.lastUpdated),
+  // Hardcoded rather than derived from publishDate/lastUpdated: the hero
+  // byline shows the edition year (2025), independent of the "Resource
+  // details" sidebar's original-publish/last-updated dates.
+  year: "2025",
   isExample: true,
   // OER-level fact: the resource itself was revised/republished. Per the
   // Section 8 aggregation rule, this alone is enough to roll the OER-level
   // status up to "Peer Reviewed · Revised" regardless of any single
   // rubric's own stage.
-  revisedResourceUrl: "https://openstax.org/details/books/introductory-statistics-2e-v2",
+  revisedResourceUrl: "https://openstax.org/details/books/psychology-2e",
   // Four rubrics at different lifecycle stages — demonstrates that each
   // rubric review progresses independently of the others. Accessibility and
   // eLearning also carry the full multi-reviewer, per-criterion detail (two
@@ -524,7 +528,7 @@ export const EXAMPLE_RESOURCE = {
           ],
         },
       ],
-      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-statistics/accessibility",
+      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-psych/accessibility",
       timeline: [
         { text: "Author revised & re-published V2", date: "2026-03-14", tone: "success" },
         { text: "Monica Xu and Thoughtful Fig reviews on V1 responded by Author", date: "2026-01-22", tone: "warning" },
@@ -567,7 +571,7 @@ export const EXAMPLE_RESOURCE = {
           ],
         },
       ],
-      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-statistics/elearning",
+      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-psych/elearning",
       timeline: [
         { text: "Author revised & re-published V2", date: "2026-03-14", tone: "success" },
         { text: "Constructive Kiwi review on V1 responded by Author", date: "2026-01-22", tone: "warning" },
@@ -610,7 +614,7 @@ export const EXAMPLE_RESOURCE = {
           ],
         },
       ],
-      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-statistics/disciplinary-appropriateness",
+      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-psych/disciplinary-appropriateness",
       timeline: [
         { text: "Author responded to review", date: "2026-01-22", tone: "warning" },
         { text: "Disciplinary Appropriateness review completed by Liam Bergström", date: "2025-11-09", tone: "info" },
@@ -651,7 +655,7 @@ export const EXAMPLE_RESOURCE = {
           ],
         },
       ],
-      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-statistics/copyright",
+      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-psych/copyright",
       timeline: [{ text: "Copyright review completed by Samuel Okonkwo", date: "2025-11-15", tone: "info" }],
       // No authorResponse/authorRevision — nothing to respond to yet.
     },
