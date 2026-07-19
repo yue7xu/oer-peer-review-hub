@@ -2,7 +2,6 @@ import React from "react";
 import { StatusBadge } from "../feedback/StatusBadge.jsx";
 import { ReviewerCard } from "./ReviewerCard.jsx";
 import { ReviewTimeline } from "./ReviewTimeline.jsx";
-import { OutboundLink } from "./OutboundLink.jsx";
 
 const CSS = `
 .oer-rubricsection { display: flex; flex-direction: column; gap: 24px; padding: 32px; background: var(--surface-subtle); border-radius: var(--radius-lg); scroll-margin-top: 24px; }
@@ -56,17 +55,6 @@ export function RubricReviewSection({ rubricReview }) {
           {rr.reviewers.map((rev, i) => (
             <ReviewerCard key={`${rev.firstName}-${rev.lastName}`} reviewer={rev} defaultExpanded={i === 0} />
           ))}
-        </div>
-      )}
-
-      {rr.reviewReportUrl && (
-        <div className="oer-rubricsection__block">
-          <h3 className="oer-rubricsection__subhead">Review report</h3>
-          <div>
-            <OutboundLink href={rr.reviewReportUrl} variant="button">
-              View full review report
-            </OutboundLink>
-          </div>
         </div>
       )}
 

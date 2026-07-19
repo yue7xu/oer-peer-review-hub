@@ -178,8 +178,6 @@ export function ResourceDetail() {
 
         {/* Sidebar */}
         <aside style={{ alignSelf: "start", display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 88 }}>
-          {hasRubricReviews && <RubricSidebarNav rubricReviews={resource.rubricReviews} />}
-
           {/* Outbound checkout */}
           <div style={{ borderRadius: "var(--radius-lg)", padding: 24, background: "var(--surface-default)", boxShadow: "var(--shadow-subtle)" }}>
             <div style={{ fontFamily: "var(--font-label)", fontSize: 13, color: "var(--text-subtle)", marginBottom: 14 }}>
@@ -224,6 +222,8 @@ export function ResourceDetail() {
               View institution profile →
             </Link>
           </div>
+
+          {hasRubricReviews && <RubricSidebarNav rubricReviews={resource.rubricReviews} />}
         </aside>
       </div>
 

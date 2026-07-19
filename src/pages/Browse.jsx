@@ -6,7 +6,8 @@ import { Checkbox } from "../components/forms/Checkbox.jsx";
 import { FilterChip } from "../components/forms/FilterChip.jsx";
 import { FilterGroup } from "../components/forms/FilterGroup.jsx";
 import { ResourceCard } from "../components/content/ResourceCard.jsx";
-import { InfoIcon } from "../components/content/InfoIcon.jsx";
+import { RubricInfoPopover } from "../components/content/RubricInfoPopover.jsx";
+import { HighlightText } from "../components/content/HighlightText.jsx";
 import { EmptyState } from "../components/content/EmptyState.jsx";
 import { Badge } from "../components/feedback/Badge.jsx";
 import { RESOURCES, FACET_GROUPS, RUBRIC_DESCRIPTIONS, EXAMPLE_RESOURCE, getAggregatedStatus } from "../data/resources.js";
@@ -167,9 +168,8 @@ export function Browse() {
                   options={group.options}
                   searchable={group.key === "primarySubject"}
                   maxVisible={maxVisible}
-                  defaultOpen={group.key !== "language"}
                   selectedCount={(pendingSelected[group.key] || new Set()).size}
-                  renderOption={(opt) => (
+                  renderOption={(opt, search) => (
                     <Checkbox
                       key={opt.label}
                       id={`${group.key}-${opt.label}`}
@@ -177,10 +177,10 @@ export function Browse() {
                         group.key === "rubric" && RUBRIC_DESCRIPTIONS[opt.label] ? (
                           <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                             {opt.label}
-                            <InfoIcon title={RUBRIC_DESCRIPTIONS[opt.label]} />
+                            <RubricInfoPopover title={opt.label} description={RUBRIC_DESCRIPTIONS[opt.label]} />
                           </span>
                         ) : (
-                          opt.label
+                          <HighlightText text={opt.label} query={search} />
                         )
                       }
                       count={opt.count}
@@ -196,7 +196,7 @@ export function Browse() {
 
           <div style={{ borderTop: "1px solid var(--border-default)", marginTop: 24, paddingTop: 20 }}>
             <Button variant="primary" size="md" onClick={applyFilters} style={{ width: "100%", marginBottom: 12 }}>
-              Apply filters{pendingCount > 0 ? ` (${pendingCount})` : ""}
+              Apply filters{pendingCount > 0 ? ` · ${pendingCount}` : ""}
             </Button>
             <button
               type="button"
