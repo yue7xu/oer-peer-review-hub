@@ -9,6 +9,8 @@ import scottsdaleLogo from "../assets/brands/scottsdale.png";
 import rioLogo from "../assets/brands/rio.png";
 import phoenixLogo from "../assets/brands/phoenix.png";
 import chandlerGilbertLogo from "../assets/brands/chandler-gilbert.png";
+import leewardLogo from "../assets/brands/Leeward.png";
+import saltLakeLogo from "../assets/brands/salt-lake.png";
 
 // Partner organizations shown on Community — logo and name only, per the
 // brand assets available in src/assets/brands/. No descriptions, URLs, or
@@ -25,4 +27,6 @@ export const PARTNERS = [
   { name: "Rio Salado College", logo: rioLogo, alt: "Rio Salado College" },
   { name: "Phoenix College", logo: phoenixLogo, alt: "Phoenix College" },
   { name: "Chandler-Gilbert Community College", logo: chandlerGilbertLogo, alt: "Chandler-Gilbert Community College" },
+  { name: "Leeward Community College", logo: leewardLogo, alt: "Leeward Community College" },
+  { name: "Salt Lake Community College", logo: saltLakeLogo, alt: "Salt Lake Community College" },
 ];

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/forms/Button.jsx";
 import { Input } from "../components/forms/Input.jsx";
 import { StatusBadge } from "../components/feedback/StatusBadge.jsx";
+import { Badge } from "../components/feedback/Badge.jsx";
 import { ResourceCard } from "../components/content/ResourceCard.jsx";
 import { FilterChip } from "../components/forms/FilterChip.jsx";
 import { PartnerLogoMarquee } from "../components/content/PartnerLogoMarquee.jsx";
@@ -187,7 +188,7 @@ export function Home() {
                 Browse Peer-Reviewed OERs
               </Button>
               <Button variant="secondary" size="md" href="/solution">
-                Learn How It Works
+                See the Solution
               </Button>
             </div>
           </div>
@@ -196,28 +197,34 @@ export function Home() {
 
       {/* Stats */}
       <section style={{ borderBottom: "1px solid var(--border-default)" }}>
-        <div
-          style={{
-            ...container,
-            padding: "40px 32px",
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: 24,
-          }}
-        >
-          {[
-            ["X", "Peer Reviewed resources"],
-            ["X", "Active reviewers"],
-            ["X", "Partner institutions"],
-            ["X", "Disciplines"],
-          ].map(([value, label]) => (
-            <div key={label}>
-              <div style={{ fontFamily: "var(--font-heading)", fontWeight: "var(--weight-display)", fontSize: 32, color: "var(--text-default)" }}>
-                {value}
+        <div style={{ ...container, padding: "40px 32px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+            <Badge variant="secondary">Demo data</Badge>
+            <span style={{ fontFamily: "var(--font-label)", fontSize: 13, color: "var(--text-subtle)" }}>
+              Illustrative figures — real reporting numbers aren&apos;t published yet.
+            </span>
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: 24,
+            }}
+          >
+            {[
+              ["30+", "Peer Reviewed resources"],
+              ["12+", "Active reviewers"],
+              ["13", "Partner institutions"],
+              ["8", "Disciplines"],
+            ].map(([value, label]) => (
+              <div key={label}>
+                <div style={{ fontFamily: "var(--font-heading)", fontWeight: "var(--weight-display)", fontSize: 32, color: "var(--text-default)" }}>
+                  {value}
+                </div>
+                <div style={{ fontFamily: "var(--font-label)", fontSize: 14, color: "var(--text-muted)" }}>{label}</div>
               </div>
-              <div style={{ fontFamily: "var(--font-label)", fontSize: 14, color: "var(--text-muted)" }}>{label}</div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 

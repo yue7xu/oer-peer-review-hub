@@ -66,9 +66,12 @@ export function About() {
         >
           <div>
             <h2 style={h2Style}>Get in touch</h2>
-            <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text-muted)", margin: "0 0 28px" }}>
+            <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text-muted)", margin: "0 0 12px" }}>
               Questions about submitting, reviewing, or partnering? Send a note and the team will reply
               within two working days.
+            </p>
+            <p style={{ fontFamily: "var(--font-label)", fontSize: 13, color: "var(--text-subtle)", margin: "0 0 20px" }}>
+              Demo data — these addresses are placeholders until the Hub&apos;s real inboxes go live.
             </p>
             <ContactChannelList channels={CONTACT_CHANNELS} />
           </div>
