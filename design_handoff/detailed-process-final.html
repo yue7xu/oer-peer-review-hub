@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How peer review works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FDFCFC; --bg:#FDFCFC; --band:#FAF9F6; --ink:#17150F; --muted:#777169;
+    --muted2:#A59F97; --line:#EBE8E4; --pill-bg:#F5F3F1; --pill-ink:#44403B;
+    --verify:#4F7A5B;
+    --mono:'Geist Mono',ui-monospace,SFMono-Regular,monospace;
+    --sans:'Inter',-apple-system,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+       -webkit-font-smoothing:antialiased;line-height:1.5}
+  .wrap{max-width:900px;margin:0 auto;padding:104px 48px}
+
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:1.44px;color:var(--muted)}
+  h1{font-weight:300;font-size:clamp(32px,4.6vw,49px);line-height:1.06;
+     letter-spacing:-1px;max-width:720px;margin-top:22px}
+  .lede{font-size:16px;line-height:27px;color:var(--muted);max-width:600px;margin-top:20px}
+
+  /* ---- controls ---- */
+  .controls{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px;margin-top:40px}
+  .toggle{display:inline-flex;gap:6px;padding:4px;border:1px solid var(--line);
+          border-radius:999px;background:var(--paper)}
+  .toggle button{font-family:var(--mono);font-size:11px;letter-spacing:.7px;
+                 text-transform:uppercase;color:var(--muted);background:none;border:none;
+                 cursor:pointer;padding:8px 16px;border-radius:999px;transition:all .25s}
+  .toggle button:hover{color:var(--ink)}
+  .toggle button.active{background:var(--ink);color:var(--paper)}
+  .toggle-hint{font-family:var(--mono);font-size:11px;letter-spacing:.5px;color:var(--muted2)}
+  .backstage{display:flex;gap:10px;align-items:baseline;margin-top:18px;
+             font-size:13px;line-height:20px;color:var(--muted);max-width:720px}
+  .backstage .bd{width:7px;height:7px;border-radius:50%;background:var(--muted2);
+                 flex:none;transform:translateY(-1px)}
+
+  /* ---- spine ---- */
+  .spine{position:relative;margin-top:56px}
+  .spine::before{content:"";position:absolute;left:50%;top:8px;bottom:8px;width:1px;
+                 background:var(--line);transform:translateX(-50%)}
+  .progress{position:absolute;left:50%;top:8px;width:1px;height:0;
+            background:var(--muted2);transform:translateX(-50%)}
+  .progress-dot{position:absolute;left:50%;top:8px;width:9px;height:9px;border-radius:50%;
+                background:var(--ink);transform:translate(-50%,-50%);opacity:0}
+  .spine.go .progress-dot{opacity:1}
+
+  .row{position:relative;display:flex;margin-bottom:44px}
+  .row:last-child{margin-bottom:0}
+  .row.left{justify-content:flex-start}
+  .row.right{justify-content:flex-end}
+  .node{position:absolute;left:50%;top:26px;width:12px;height:12px;border-radius:50%;
+        background:var(--paper);border:1.5px solid var(--line);transform:translateX(-50%);
+        z-index:2;transition:background .4s,border-color .4s}
+  .row.in .node{background:var(--ink);border-color:var(--ink)}
+
+  .card{width:calc(50% - 34px);background:var(--paper);border:1px solid var(--line);
+        border-radius:20px;padding:26px 28px}
+  .spine.anim .row{opacity:0}
+  .spine.anim .row.left{transform:translateX(-36px)}
+  .spine.anim .row.right{transform:translateX(36px)}
+  .spine.anim .row.in{opacity:1;transform:none;transition:opacity .6s ease,transform .6s cubic-bezier(.3,0,.1,1)}
+
+  .c-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .rolepill{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;
+            letter-spacing:.88px;text-transform:uppercase;color:var(--muted)}
+  .rd{width:8px;height:8px;border-radius:50%}
+  .rd.author{background:var(--ink)}
+  .rd.reviewer{background:var(--paper);border:1px solid var(--ink)}
+  .rd.public{background:var(--muted)}
+  .num{font-family:var(--mono);font-size:12px;letter-spacing:.96px;color:var(--muted2)}
+  .card h3{font-weight:300;font-size:22px;line-height:31px;letter-spacing:-.44px;margin-top:14px}
+  .card h3 .opt{font-size:14px;color:var(--muted);letter-spacing:0}
+  .desc{font-size:14px;line-height:22px;color:var(--muted);margin-top:8px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.3px;color:var(--pill-ink);
+        background:var(--pill-bg);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+
+  .s-pill{margin-top:16px}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;
+        letter-spacing:.4px;padding:6px 12px;border-radius:999px;background:var(--pill-bg);
+        border:1px solid var(--line);color:var(--pill-ink)}
+  .pill .vd{width:7px;height:7px;border-radius:50%;background:var(--verify)}
+  .spine.anim .row .s-pill .pill{opacity:0;transform:scale(.9)}
+  .spine.anim .row.in .s-pill .pill{opacity:1;transform:scale(1);
+                                    transition:opacity .45s ease .2s,transform .45s cubic-bezier(.2,1.3,.4,1) .2s}
+
+  .divider{height:1px;background:var(--line);margin-top:18px}
+  ul{list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:8px}
+  li{display:flex;gap:12px;font-size:14px;line-height:22px;color:var(--muted)}
+  li::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--muted2);
+             margin-top:9px;flex:none}
+
+  /* toggle highlight */
+  .spine.filter-author .row.in:not(.author),
+  .spine.filter-reviewer .row.in:not(.reviewer){opacity:.34}
+  .spine.filter-author .row:not(.author),
+  .spine.filter-reviewer .row:not(.reviewer){opacity:.34;transition:opacity .3s}
+  .spine.filter-author .row.author .node,
+  .spine.filter-reviewer .row.reviewer .node{background:var(--ink);border-color:var(--ink)}
+
+  /* ---- trust loop ---- */
+  .close{margin-top:88px;padding:40px;border:1px solid var(--line);border-radius:20px;background:var(--band)}
+  .sec-eye{font-family:var(--mono);font-size:12px;letter-spacing:1.2px;color:var(--muted)}
+  .sec-h{font-weight:300;font-size:clamp(24px,3vw,31px);letter-spacing:-.6px;margin-top:12px}
+  .badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+  .close ul{margin-top:22px}
+  .close li{font-size:15px;line-height:23px}
+  .close li b{color:var(--ink);font-weight:500}
+  .close li::before{width:5px;height:5px;margin-top:9px}
+  .notes{margin-top:26px;padding-top:22px;border-top:1px solid var(--line);
+          display:flex;flex-direction:column;gap:12px}
+  .note{display:flex;gap:11px;font-size:13px;line-height:20px;color:var(--muted)}
+  .note svg{width:15px;height:15px;stroke:var(--muted);fill:none;stroke-width:1.5;flex:none;margin-top:3px}
+
+  /* ---- CTA ---- */
+  .cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:40px}
+  .btn{font-size:15px;padding:14px 26px;border-radius:999px;cursor:pointer;
+       border:1px solid var(--ink);text-decoration:none;display:inline-block;transition:all .2s}
+  .btn.primary{background:var(--ink);color:var(--paper)}
+  .btn.primary:hover{opacity:.88}
+  .btn.ghost{background:none;color:var(--ink);border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--ink)}
+
+  /* ---- jump button (step 03 -> rubric method) ---- */
+  .jump{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-family:var(--mono);
+        font-size:11px;letter-spacing:.4px;color:var(--ink);text-decoration:none;
+        border:1px solid var(--line);border-radius:999px;padding:8px 14px;transition:all .2s}
+  .jump:hover{border-color:var(--ink)}
+  .jump .ar{transition:transform .2s}
+  .jump:hover .ar{transform:translateY(2px)}
+
+  /* ---- single-point rubric method ---- */
+  .method{margin-top:88px;padding-top:44px;border-top:1px solid var(--line)}
+  .method-lede{font-size:15px;line-height:25px;color:var(--muted);max-width:640px;margin-top:16px}
+  .rubset{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+  .rchip{font-family:var(--mono);font-size:11px;letter-spacing:.3px;color:var(--pill-ink);
+         background:var(--pill-bg);border:1px solid var(--line);border-radius:7px;padding:6px 11px}
+
+  .spr{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:16px;align-items:stretch;
+       margin-top:32px}
+  .spr-side{border:1px solid var(--line);border-radius:16px;padding:20px;background:var(--paper);
+            transition:opacity .3s,border-color .3s}
+  .spr-side:not(.on){opacity:.4}
+  .spr-tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;
+           letter-spacing:.4px;color:var(--pill-ink);background:var(--pill-bg);
+           border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;
+           transition:all .2s}
+  .spr-tag .tdot{width:8px;height:8px;border-radius:50%;background:var(--muted2)}
+  .spr-side.exceed .tdot{background:var(--verify)}
+  .spr-side.on .spr-tag{border-color:var(--ink);color:var(--ink)}
+  .spr-com{font-size:13.5px;line-height:21px;color:var(--muted);margin-top:14px}
+  .spr-target{border:1.5px solid var(--ink);border-radius:16px;padding:22px;background:var(--band);
+              display:flex;flex-direction:column;justify-content:center}
+  .spr-tlabel{font-family:var(--mono);font-size:10.5px;letter-spacing:.9px;color:var(--muted)}
+  .spr-ttext{font-size:15px;line-height:24px;color:var(--ink);margin-top:12px}
+  .spr-caption{font-size:13px;line-height:20px;color:var(--muted);margin-top:20px;max-width:640px}
+
+  @media (max-width:820px){
+    .wrap{padding:60px 22px}
+    .spr{grid-template-columns:1fr}
+    .spr-target{order:-1}
+    .spine::before,.progress,.progress-dot{left:6px}
+    .row.left,.row.right{justify-content:flex-start}
+    .node{left:6px}
+    .card{width:100%;margin-left:30px}
+    .spine.anim .row.left,.spine.anim .row.right{transform:translateX(24px)}
+    .close{padding:28px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .spine.anim .row{opacity:1;transform:none}
+    .spine.anim .row .s-pill .pill{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">HOW PEER REVIEW WORKS</div>
+  <h1>The peer review flow, with every role on one path.</h1>
+  <p class="lede">Trained reviewers evaluate each resource against six evidence-based rubrics, criterion by criterion. Authors respond and can revise, and every result you see is transparent down to the criterion.</p>
+
+  <div class="controls">
+    <div class="toggle">
+      <button data-role="author">For Authors</button>
+      <button data-role="reviewer">For Reviewers</button>
+    </div>
+    <span class="toggle-hint">Trace one role through the flow</span>
+  </div>
+  <div class="backstage">
+    <span class="bd"></span>
+    <span>A coordinator matches reviewers and keeps rounds on schedule behind the scenes. Coordinators never appear in a public review.</span>
+  </div>
+
+  <div class="spine">
+    <div class="progress"></div>
+    <div class="progress-dot"></div>
+
+    <!-- 01 pretraining -->
+    <div class="row left reviewer">
+      <div class="node"></div>
+      <div class="card">
+        <div class="c-head">
+          <span class="rolepill"><span class="rd reviewer"></span>Reviewer</span>
+          <span class="num">01</span>
+        </div>
+        <h3>Reviewers qualify first</h3>
+        <p class="desc">Every reviewer completes a pre-training course before they can review, so each evaluation comes from a qualified, calibrated reviewer.</p>
+        <div class="divider"></div>
+        <ul>
+          <li>A structured course on the six rubrics and how to apply them</li>
+          <li>Only qualified reviewers can review and earn a badge</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 02 submit -->
+    <div class="row right author">
+      <div class="node"></div>
+      <div class="card">
+        <div class="c-head">
+          <span class="rolepill"><span class="rd author"></span>Author</span>
+          <span class="num">02</span>
+        </div>
+        <h3>Submit the resource</h3>
+        <p class="desc">An author adds an OER link and picks the rubrics it should be reviewed on.</p>
+        <div class="divider"></div>
+        <ul>
+          <li>Links to where the resource already lives</li>
+          <li>The author sets whether the review can become public</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 03 review + rubric narrative -->
+    <div class="row left reviewer">
+      <div class="node"></div>
+      <div class="card">
+        <div class="c-head">
+          <span class="rolepill"><span class="rd reviewer"></span>Reviewer</span>
+          <span class="num">03</span>
+        </div>
+        <h3>Review against the rubrics</h3>
+        <p class="desc">A matched reviewer works through the resource criterion by criterion across the six rubrics, backed by evidence at every point.</p>
+        <div class="divider"></div>
+        <ul>
+          <li>One rating and comment per criterion</li>
+          <li>Reviewers are anonymous in public reviews</li>
+        </ul>
+        <a class="jump" href="#rubrics">See the six rubrics <span class="ar">↓</span></a>
+      </div>
+    </div>
+
+    <!-- 04 respond -->
+    <div class="row right author">
+      <div class="node"></div>
+      <div class="card">
+        <div class="c-head">
+          <span class="rolepill"><span class="rd author"></span>Author</span>
+          <span class="num">04</span>
+        </div>
+        <h3>Respond to the feedback</h3>
+        <p class="desc">The author replies to every point. Nothing becomes public until they have.</p>
+        <div class="s-pill"><span class="pill"><span class="vd"></span>Peer Reviewed</span></div>
+        <div class="divider"></div>
+        <ul>
+          <li>Replies are part of the public record</li>
+          <li>This is where a resource becomes Peer Reviewed</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 05 revise -->
+    <div class="row left author">
+      <div class="node"></div>
+      <div class="card">
+        <div class="c-head">
+          <span class="rolepill"><span class="rd author"></span>Author</span>
+          <span class="num">05</span>
+        </div>
+        <h3>Revise <span class="opt">· optional</span></h3>
+        <p class="desc">The author can update the resource, and it is reviewed again.</p>
+        <div class="s-pill"><span class="pill"><span class="vd"></span>Peer Reviewed · Revised</span></div>
+        <div class="divider"></div>
+        <ul>
+          <li>Revisions link back to the reviewed version</li>
+          <li>The full history is kept across rounds</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 06 publish -->
+    <div class="row right author">
+      <div class="node"></div>
+      <div class="card">
+        <div class="c-head">
+          <span class="rolepill"><span class="rd author"></span>Author</span>
+          <span class="num">06</span>
+        </div>
+        <h3>Publish</h3>
+        <p class="desc">The author makes the result public, reversible at any time.</p>
+        <div class="divider"></div>
+        <ul>
+          <li>Unpublish or re-publish whenever they choose</li>
+          <li>Publishing changes visibility, not the review</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 07 discover -->
+    <div class="row left public">
+      <div class="node"></div>
+      <div class="card">
+        <div class="c-head">
+          <span class="rolepill"><span class="rd public"></span>Public</span>
+          <span class="num">07</span>
+        </div>
+        <h3>Discover</h3>
+        <p class="desc">Adopters read the full per-criterion review in Browse before adopting.</p>
+        <div class="divider"></div>
+        <ul>
+          <li>Ratings and comments, criterion by criterion</li>
+          <li>Private and student reviews never appear here</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- single-point rubric method -->
+  <div class="method" id="rubrics">
+    <div class="sec-eye">THE RUBRIC METHOD</div>
+    <h2 class="sec-h">Single-point rubrics, built for comments.</h2>
+    <p class="method-lede">All six rubrics share one design. Each criterion describes a single target — what meeting the standard looks like — and reviewers respond with specific written comments instead of a number. A criterion isn't forced into one verdict: the same one can be marked as exceeding in some ways and needing work in others, at the same time.</p>
+
+    <div class="rubset">
+      <span class="rchip">Accessibility</span>
+      <span class="rchip">Copy Editing</span>
+      <span class="rchip">Copyright</span>
+      <span class="rchip">Disciplinary Appropriateness</span>
+      <span class="rchip">eLearning</span>
+      <span class="rchip">UDL</span>
+    </div>
+
+    <div class="spr" id="spr">
+      <div class="spr-side improve on" data-side="improve">
+        <button class="spr-tag"><span class="tdot"></span>Needs Improvement</button>
+        <p class="spr-com">A written comment on where the resource falls short of the standard.</p>
+      </div>
+
+      <div class="spr-target">
+        <div class="spr-tlabel">EXEMPLIFIED</div>
+        <p class="spr-ttext">Each criterion names one clear standard — a single description of what the resource is expected to meet.</p>
+      </div>
+
+      <div class="spr-side exceed on" data-side="exceed">
+        <button class="spr-tag"><span class="tdot"></span>Exceeds</button>
+        <p class="spr-com">A written comment on where the resource goes beyond the standard.</p>
+      </div>
+    </div>
+    <p class="spr-caption">Both sides can be marked on one criterion at once — feedback isn't reduced to a single verdict. Try turning each rating on or off.</p>
+  </div>
+
+  <!-- trust loop -->
+  <div class="close">
+    <div class="sec-eye">THE RESULT</div>
+    <h2 class="sec-h">What a published review shows.</h2>
+    <div class="badges">
+      <span class="pill"><span class="vd"></span>Peer Reviewed</span>
+      <span class="pill"><span class="vd"></span>Peer Reviewed · Revised</span>
+    </div>
+    <ul>
+      <li>Every reviewer <b>rating and comment</b>, criterion by criterion</li>
+      <li>The <b>author's reply</b> to each point</li>
+      <li>A status of <b>Peer Reviewed</b>, or <b>Peer Reviewed · Revised</b> after an update</li>
+      <li>Reviewers stay <b>anonymous</b>. Working notes and annotations are not shown</li>
+    </ul>
+    <div class="notes">
+      <div class="note">
+        <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        <span>Private by default. Authors decide whether completed results are published.</span>
+      </div>
+      <div class="note">
+        <svg viewBox="0 0 24 24"><path d="M12 3l9 4.5-9 4.5-9-4.5L12 3z"/><path d="M6.5 9.5V14c0 1.7 2.9 3 6 3s6-1.3 6-3V9.5"/></svg>
+        <span>Student and self-reviews are supported, but only reviews by qualified reviewers earn a badge.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta">
+    <a class="btn primary" href="#">Browse peer-reviewed OER</a>
+    <a class="btn ghost" href="#">Sign up to take part</a>
+  </div>
+
+</div>
+
+<script>
+  const spine = document.querySelector('.spine');
+  const prog = spine.querySelector('.progress');
+  const dot = spine.querySelector('.progress-dot');
+  const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(!reduce) spine.classList.add('anim');
+
+  // For Authors / For Reviewers highlight
+  document.querySelectorAll('.toggle button').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const role = btn.dataset.role;
+      const on = spine.classList.contains('filter-'+role);
+      spine.classList.remove('filter-author','filter-reviewer');
+      document.querySelectorAll('.toggle button').forEach(b=>b.classList.remove('active'));
+      if(!on){ spine.classList.add('filter-'+role); btn.classList.add('active'); }
+    });
+  });
+
+  // reveal cards on enter
+  const rows = [...spine.querySelectorAll('.row')];
+  if('IntersectionObserver' in window){
+    const io = new IntersectionObserver((es)=>{
+      es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
+    },{threshold:.2, rootMargin:'0px 0px -12% 0px'});
+    rows.forEach(r=>io.observe(r));
+  } else {
+    rows.forEach(r=>r.classList.add('in'));
+  }
+
+  // spine draw + travelling dot
+  if(!reduce){
+    let ticking=false;
+    const draw=()=>{
+      const r=spine.getBoundingClientRect();
+      const h=spine.offsetHeight;
+      let p=(innerHeight*0.55 - r.top)/h;
+      p=Math.max(0,Math.min(1,p));
+      const y=p*(h-16);
+      prog.style.height=y+'px';
+      dot.style.top=(8+y)+'px';
+      spine.classList.toggle('go', p>0.001 && p<0.999);
+      ticking=false;
+    };
+    const onScroll=()=>{ if(!ticking){ ticking=true; requestAnimationFrame(draw); } };
+    addEventListener('scroll',onScroll,{passive:true});
+    addEventListener('resize',onScroll);
+    draw();
+  } else {
+    prog.style.height='100%';
+  }
+
+  // single-point rubric: each rating toggles independently (a criterion can hold both)
+  document.querySelectorAll('.spr-tag').forEach(tag=>{
+    tag.addEventListener('click',()=>{
+      tag.closest('.spr-side').classList.toggle('on');
+    });
+  });
+</script>
+</body>
+</html>

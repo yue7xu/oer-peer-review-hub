@@ -44,12 +44,12 @@ export function Footer() {
               <Link to="/browse" style={footerLinkStyle}>
                 Browse resources
               </Link>
-              <a href="/#how-it-works" style={footerLinkStyle}>
+              <Link to="/solution" style={footerLinkStyle}>
                 How peer review works
-              </a>
-              <a href="/#how-it-works" style={footerLinkStyle}>
+              </Link>
+              <Link to="/solution" style={footerLinkStyle}>
                 Our process
-              </a>
+              </Link>
             </div>
           </div>
           <div>

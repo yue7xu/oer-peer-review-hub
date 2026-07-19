@@ -5,7 +5,7 @@ import { AnimatedTabBar } from "./AnimatedTabBar.jsx";
 
 const NAV_LINKS = [
   { to: "/browse", label: "Browse" },
-  { to: "/solution", label: "Solution" },
+  { to: "/solution", label: "How It Works" },
   { to: "/community", label: "Community" },
   { to: "/about", label: "About" },
 ];
