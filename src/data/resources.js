@@ -109,8 +109,8 @@ function buildRealRubricReviews(rubricNames) {
     rubricId: slugify(rubric),
     status: "peer_reviewed",
     reviewers: [nextPlaceholderReviewer()],
-    // No criteria/reviewReportUrl/timeline/authorResponse/authorRevision yet —
-    // none of that detail exists for real submissions.
+    // No criteria/timeline/authorResponse/authorRevision yet — none of that
+    // detail exists for real submissions.
   }));
 }
 
@@ -386,10 +386,8 @@ export const RESOURCES = RAW.map((r) => ({
 // layouts can be seen in their fully-populated state. None of the sheet's
 // real entries have this level of detail yet (see RAW above), so this is
 // clearly marked `isExample: true` rather than presented as a live catalog
-// record. The DOI uses CrossRef's reserved 10.5555 test prefix (never
-// resolves); reviewReportUrl values use example.com, the IANA-reserved
-// documentation domain (RFC 2606, never resolves) — both intentionally
-// non-resolving placeholders, not real links.
+// record. The DOI uses CrossRef's reserved 10.5555 test prefix — never
+// resolves, an intentional placeholder rather than a real link.
 const EXAMPLE_RAW = {
   title: "Introduction to Psychology 2e",
   authors: "Julie Lazzara",
@@ -528,15 +526,49 @@ export const EXAMPLE_RESOURCE = {
           ],
         },
       ],
-      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-psych/accessibility",
       timeline: [
-        { text: "Author revised & re-published V2", date: "2026-03-14", tone: "success" },
-        { text: "Monica Xu and Thoughtful Fig reviews on V1 responded by Author", date: "2026-01-22", tone: "warning" },
-        { text: "V1 review completed by Monica Xu", date: "2025-12-27", tone: "info" },
-        { text: "V1 review completed by Thoughtful Fig", date: "2025-12-25", tone: "info" },
-        { text: "V1 review started by Thoughtful Fig", date: "2025-11-16", tone: "info" },
-        { text: "V1 review started by Monica Xu", date: "2025-11-12", tone: "info" },
-        { text: "V1 request review by Author", date: "2025-11-02", tone: "error" },
+        {
+          title: "Author revised & re-published V2",
+          date: "2026-03-14",
+          tone: "success",
+          description: "All requested accessibility revisions were incorporated and the second edition went live.",
+        },
+        {
+          title: "Author responded to V1 reviews",
+          date: "2026-01-22",
+          tone: "warning",
+          description: "Addressed feedback from Monica Xu and Thoughtful Fig on alternative text and table structure.",
+        },
+        {
+          title: "V1 review completed by Monica Xu",
+          date: "2025-12-27",
+          tone: "info",
+          description: "Full Accessibility rubric evaluation submitted, covering all eight criteria.",
+        },
+        {
+          title: "V1 review completed by Thoughtful Fig",
+          date: "2025-12-25",
+          tone: "info",
+          description: "Second independent Accessibility review submitted.",
+        },
+        {
+          title: "V1 review started by Thoughtful Fig",
+          date: "2025-11-16",
+          tone: "info",
+          description: "Second reviewer began evaluating the resource against the Accessibility rubric.",
+        },
+        {
+          title: "V1 review started by Monica Xu",
+          date: "2025-11-12",
+          tone: "info",
+          description: "First reviewer began evaluating the resource against the Accessibility rubric.",
+        },
+        {
+          title: "V1 request review by Author",
+          date: "2025-11-02",
+          tone: "error",
+          description: "Author submitted the resource for Accessibility peer review.",
+        },
       ],
       authorRevision: {
         date: "2026-03-14",
@@ -571,13 +603,37 @@ export const EXAMPLE_RESOURCE = {
           ],
         },
       ],
-      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-psych/elearning",
       timeline: [
-        { text: "Author revised & re-published V2", date: "2026-03-14", tone: "success" },
-        { text: "Constructive Kiwi review on V1 responded by Author", date: "2026-01-22", tone: "warning" },
-        { text: "V1 review completed by Constructive Kiwi", date: "2025-12-30", tone: "info" },
-        { text: "V1 review started by Constructive Kiwi", date: "2025-11-16", tone: "info" },
-        { text: "V1 request review by Author", date: "2025-11-02", tone: "error" },
+        {
+          title: "Author revised & re-published V2",
+          date: "2026-03-14",
+          tone: "success",
+          description: "LMS integration and technical-support revisions were incorporated and the second edition went live.",
+        },
+        {
+          title: "Author responded to V1 review",
+          date: "2026-01-22",
+          tone: "warning",
+          description: "Addressed Constructive Kiwi's feedback on LMS integration and interoperability.",
+        },
+        {
+          title: "V1 review completed by Constructive Kiwi",
+          date: "2025-12-30",
+          tone: "info",
+          description: "Full eLearning rubric evaluation submitted.",
+        },
+        {
+          title: "V1 review started by Constructive Kiwi",
+          date: "2025-11-16",
+          tone: "info",
+          description: "Reviewer began evaluating the resource against the eLearning rubric.",
+        },
+        {
+          title: "V1 request review by Author",
+          date: "2025-11-02",
+          tone: "error",
+          description: "Author submitted the resource for eLearning peer review.",
+        },
       ],
       authorRevision: {
         date: "2026-03-14",
@@ -614,11 +670,25 @@ export const EXAMPLE_RESOURCE = {
           ],
         },
       ],
-      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-psych/disciplinary-appropriateness",
       timeline: [
-        { text: "Author responded to review", date: "2026-01-22", tone: "warning" },
-        { text: "Disciplinary Appropriateness review completed by Liam Bergström", date: "2025-11-09", tone: "info" },
-        { text: "V1 request review by Author", date: "2025-10-20", tone: "error" },
+        {
+          title: "Author responded to review",
+          date: "2026-01-22",
+          tone: "warning",
+          description: "Addressed Liam Bergström's feedback on notation consistency.",
+        },
+        {
+          title: "Disciplinary Appropriateness review completed by Liam Bergström",
+          date: "2025-11-09",
+          tone: "info",
+          description: "Full rubric evaluation submitted; recommended standardizing proportion notation.",
+        },
+        {
+          title: "V1 request review by Author",
+          date: "2025-10-20",
+          tone: "error",
+          description: "Author submitted the resource for Disciplinary Appropriateness peer review.",
+        },
       ],
       authorResponse: {
         date: "2026-01-22",
@@ -655,8 +725,14 @@ export const EXAMPLE_RESOURCE = {
           ],
         },
       ],
-      reviewReportUrl: "https://example.com/o4pr/reviews/example-intro-psych/copyright",
-      timeline: [{ text: "Copyright review completed by Samuel Okonkwo", date: "2025-11-15", tone: "info" }],
+      timeline: [
+        {
+          title: "Copyright review completed by Samuel Okonkwo",
+          date: "2025-11-15",
+          tone: "info",
+          description: "Full rubric evaluation submitted; no revisions requested.",
+        },
+      ],
       // No authorResponse/authorRevision — nothing to respond to yet.
     },
   ],
