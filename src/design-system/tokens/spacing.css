@@ -40,4 +40,17 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-short: 150ms;
   --dur-med: 220ms;
+  /* Promoted from hard-coded literals already in use across hiwStyles.js —
+     see docs/design/MOTION_SYSTEM.md § Duration tokens for the precedent
+     each value is drawn from. */
+  --dur-cross: 400ms;
+  --dur-long: 450ms;
+  --dur-panel: 480ms;
+  --dur-reveal: 600ms;
+  --dur-stagger-step: 90ms;
+
+  /* ── Breakpoints (reference only — media queries need literal px) ──── */
+  --bp-sm: 640px;
+  --bp-md: 900px;
+  --bp-lg: 1280px;
 }
