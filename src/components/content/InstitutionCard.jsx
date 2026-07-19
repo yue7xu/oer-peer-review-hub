@@ -1,16 +1,22 @@
 import React from "react";
-import { LogoPlaceholder } from "./LogoPlaceholder.jsx";
 
 const CSS = `
 .oer-instcard {
   border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 14px;
-  background: var(--surface-subtle); box-sizing: border-box;
+  align-items: flex-start; background: var(--surface-subtle); box-sizing: border-box; height: 100%;
 }
+.oer-instcard__logo-frame {
+  width: 100%; height: 56px; display: flex; align-items: center; justify-content: flex-start;
+}
+.oer-instcard__logo { max-width: 100%; max-height: 100%; object-fit: contain; }
 .oer-instcard__name {
-  font-family: var(--font-heading); font-weight: var(--weight-display); font-size: 17px;
-  line-height: 1.35; color: var(--text-default); margin: 0 0 4px;
+  font-family: var(--font-heading); font-weight: var(--weight-display); font-size: 16px;
+  line-height: 1.35; color: var(--text-default); margin: 0;
 }
-.oer-instcard__location { font-size: 14px; color: var(--text-muted); }
+
+@media (max-width: 640px) {
+  .oer-instcard { padding: 16px; gap: 12px; }
+}
 `;
 
 let injected = false;
@@ -25,18 +31,17 @@ function useStyles() {
 }
 
 /**
- * InstitutionCard — a partner institution's logo placeholder, name, and
- * location. Used by Community's "Partner institutions" grid.
+ * InstitutionCard — a partner organization's logo and name. Used by
+ * Community's partner grid; logo/alt come from src/data/partners.js.
  */
-export function InstitutionCard({ name, initials, location, className = "", ...rest }) {
+export function InstitutionCard({ name, logo, alt = "", className = "", ...rest }) {
   useStyles();
   return (
     <div className={`oer-instcard ${className}`.trim()} {...rest}>
-      <LogoPlaceholder initials={initials} />
-      <div>
-        <h3 className="oer-instcard__name">{name}</h3>
-        <div className="oer-instcard__location">{location}</div>
+      <div className="oer-instcard__logo-frame">
+        <img src={logo} alt={alt} className="oer-instcard__logo" />
       </div>
+      <h3 className="oer-instcard__name">{name}</h3>
     </div>
   );
 }

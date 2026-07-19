@@ -5,7 +5,9 @@ import { Input } from "../components/forms/Input.jsx";
 import { StatusBadge } from "../components/feedback/StatusBadge.jsx";
 import { ResourceCard } from "../components/content/ResourceCard.jsx";
 import { FilterChip } from "../components/forms/FilterChip.jsx";
+import { PartnerLogoMarquee } from "../components/content/PartnerLogoMarquee.jsx";
 import { RESOURCES, getAggregatedStatus } from "../data/resources.js";
+import { PARTNERS } from "../data/partners.js";
 
 const container = { maxWidth: 1280, margin: "0 auto", padding: "0 32px" };
 
@@ -219,6 +221,31 @@ export function Home() {
         </div>
       </section>
 
+      {/* Our Partners */}
+      <section style={{ borderBottom: "1px solid var(--border-default)" }}>
+        <div style={{ ...container, padding: "56px 32px" }}>
+          <div style={{ maxWidth: 700, marginBottom: 40 }}>
+            <h2
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontWeight: "var(--weight-display)",
+                fontSize: 32,
+                lineHeight: 1.2,
+                letterSpacing: "-0.01em",
+                color: "var(--text-default)",
+                margin: "0 0 12px",
+              }}
+            >
+              Our Partners
+            </h2>
+            <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>
+              Universities, colleges, and open-education projects collaborating with the Hub on peer review.
+            </p>
+          </div>
+          <PartnerLogoMarquee partners={PARTNERS} duration={32} pauseOnHover />
+        </div>
+      </section>
+
       {/* The lifecycle */}
       <section id="how-it-works">
         <div style={{ ...container, padding: "72px 32px" }}>
@@ -416,6 +443,35 @@ export function Home() {
         </div>
       </section>
 
+      {/* Browse by discipline */}
+      <section style={{ borderTop: "1px solid var(--border-default)" }}>
+        <div style={{ ...container, padding: "72px 32px" }}>
+          <h2
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: "var(--weight-display)",
+              fontSize: 32,
+              lineHeight: 1.2,
+              letterSpacing: "-0.01em",
+              color: "var(--text-default)",
+              margin: "0 0 32px",
+            }}
+          >
+            Browse by discipline
+          </h2>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            {DISCIPLINES.map((label) => (
+              <FilterChip
+                key={label}
+                label={label}
+                onClick={() => navigate("/browse")}
+                onRemove={() => navigate("/browse")}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Featured resources */}
       <section
         style={{
@@ -464,35 +520,6 @@ export function Home() {
                 status={getAggregatedStatus(r)}
                 reviewCount={r.rubricReviews.length}
                 sourceHref={r.sourceUrl}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Browse by discipline */}
-      <section>
-        <div style={{ ...container, padding: "72px 32px" }}>
-          <h2
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontWeight: "var(--weight-display)",
-              fontSize: 32,
-              lineHeight: 1.2,
-              letterSpacing: "-0.01em",
-              color: "var(--text-default)",
-              margin: "0 0 32px",
-            }}
-          >
-            Browse by discipline
-          </h2>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {DISCIPLINES.map((label) => (
-              <FilterChip
-                key={label}
-                label={label}
-                onClick={() => navigate("/browse")}
-                onRemove={() => navigate("/browse")}
               />
             ))}
           </div>
