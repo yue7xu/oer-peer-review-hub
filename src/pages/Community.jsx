@@ -5,16 +5,9 @@ import { ProjectCard } from "../components/content/ProjectCard.jsx";
 import { ContactChannelList } from "../components/content/ContactChannelList.jsx";
 import { ContactFormCard } from "../components/content/ContactFormCard.jsx";
 import { CONTACT_CHANNELS } from "../data/contact.js";
+import { PARTNERS } from "../data/partners.js";
 
 const container = { maxWidth: 1280, margin: "0 auto" };
-
-const INSTITUTIONS = [
-  { name: "Open Learning Initiative", initials: "OLI", location: "Pittsburgh, Pennsylvania" },
-  { name: "Arizona State University", initials: "ASU", location: "Tempe, Arizona" },
-  { name: "Carnegie Mellon University", initials: "CMU", location: "Pittsburgh, Pennsylvania" },
-  { name: "Maricopa Community Colleges", initials: "MCC", location: "Tempe, Arizona" },
-  { name: "OpenStax", initials: "OS", location: "Houston, Texas" },
-];
 
 export function Community() {
   return (
@@ -57,11 +50,22 @@ export function Community() {
             </Button>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20 }}>
-            {INSTITUTIONS.map((inst) => (
-              <InstitutionCard key={inst.name} name={inst.name} initials={inst.initials} location={inst.location} />
+          <ul
+            style={{
+              listStyle: "none",
+              margin: 0,
+              padding: 0,
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: 20,
+            }}
+          >
+            {PARTNERS.map((partner) => (
+              <li key={partner.name}>
+                <InstitutionCard name={partner.name} logo={partner.logo} alt={partner.alt} />
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
