@@ -184,7 +184,7 @@ export function Home() {
               <Button variant="secondary" size="md" href="/browse">
                 Browse Peer-Reviewed OERs
               </Button>
-              <Button variant="secondary" size="md" href="/#how-it-works">
+              <Button variant="secondary" size="md" href="/solution">
                 Learn How It Works
               </Button>
             </div>
@@ -324,7 +324,7 @@ export function Home() {
           </div>
 
           <div style={{ marginTop: 28 }}>
-            <Button variant="primary" size="md" href="#">
+            <Button variant="primary" size="md" href="/solution">
               See the detailed process →
             </Button>
           </div>

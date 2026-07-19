@@ -5,7 +5,7 @@ import { Button } from "../forms/Button.jsx";
 const NAV_LINKS = [
   { to: "/", label: "Home" },
   { to: "/browse", label: "Browse" },
-  { to: "/solution", label: "Solution" },
+  { to: "/solution", label: "How It Works" },
   { to: "/community", label: "Community" },
   { to: "/about", label: "About" },
 ];
