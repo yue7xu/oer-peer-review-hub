@@ -3,21 +3,27 @@ import { LogoPlaceholder } from "./LogoPlaceholder.jsx";
 import { Badge } from "../feedback/Badge.jsx";
 import { OutboundLink } from "./OutboundLink.jsx";
 
+/* Same card family as InstitutionCard.jsx — flat surface-subtle fill, no
+   shadow, radius-lg, height:100% to fill its grid cell, logo-then-name
+   vertical rhythm — so "Partner institutions" and "Related projects" read
+   as one consistent card system rather than two different treatments. */
 const CSS = `
 .oer-projectcard {
-  flex: 1 1 380px; max-width: 587px; box-sizing: border-box;
-  background: var(--surface-default); box-shadow: var(--shadow-subtle); border-radius: var(--radius-lg);
-  padding: 32px; display: flex; flex-direction: column; gap: 20px;
+  border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 14px;
+  align-items: flex-start; background: var(--surface-subtle); box-sizing: border-box; height: 100%;
 }
-.oer-projectcard__head { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-.oer-projectcard__logo { width: 120px; flex: none; }
+.oer-projectcard__head { display: flex; flex-direction: column; gap: 2px; }
 .oer-projectcard__name {
-  font-family: var(--font-heading); font-weight: var(--weight-display); font-size: 24px;
-  line-height: 1.25; color: var(--text-default); margin: 0 0 4px;
+  font-family: var(--font-heading); font-weight: var(--weight-display); font-size: 18px;
+  line-height: 1.3; color: var(--text-default); margin: 0;
 }
-.oer-projectcard__subtitle { font-family: var(--font-label); font-size: 14px; color: var(--text-muted); }
-.oer-projectcard__desc { font-size: 16px; line-height: 1.6; color: var(--text-muted); margin: 0; }
-.oer-projectcard__badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.oer-projectcard__subtitle { font-family: var(--font-label); font-size: 13px; color: var(--text-muted); }
+.oer-projectcard__desc { font-size: 14px; line-height: 1.6; color: var(--text-muted); margin: 0; }
+.oer-projectcard__badges { display: flex; gap: 6px; flex-wrap: wrap; }
+
+@media (max-width: 640px) {
+  .oer-projectcard { padding: 16px; gap: 12px; }
+}
 `;
 
 let injected = false;
@@ -40,6 +46,7 @@ function useStyles() {
  */
 export function ProjectCard({
   initials = "?",
+  logoShape = "square",
   name,
   subtitle,
   description,
@@ -52,14 +59,10 @@ export function ProjectCard({
   useStyles();
   return (
     <div className={`oer-projectcard ${className}`.trim()} {...rest}>
+      <LogoPlaceholder initials={initials} shape={logoShape} />
       <div className="oer-projectcard__head">
-        <div className="oer-projectcard__logo">
-          <LogoPlaceholder initials={initials} />
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <h3 className="oer-projectcard__name">{name}</h3>
-          {subtitle && <div className="oer-projectcard__subtitle">{subtitle}</div>}
-        </div>
+        <h3 className="oer-projectcard__name">{name}</h3>
+        {subtitle && <div className="oer-projectcard__subtitle">{subtitle}</div>}
       </div>
       {description && <p className="oer-projectcard__desc">{description}</p>}
       {badges && badges.length > 0 && (

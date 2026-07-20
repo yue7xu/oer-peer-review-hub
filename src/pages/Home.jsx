@@ -6,48 +6,21 @@ import { StatusBadge } from "../components/feedback/StatusBadge.jsx";
 import { Badge } from "../components/feedback/Badge.jsx";
 import { FilterChip } from "../components/forms/FilterChip.jsx";
 import { PartnerLogoMarquee } from "../components/content/PartnerLogoMarquee.jsx";
-import { InstitutionCard } from "../components/content/InstitutionCard.jsx";
+import { InstitutionsGrid } from "../components/content/InstitutionsGrid.jsx";
 import { ReviewTimeline } from "../components/content/ReviewTimeline.jsx";
+import { OutboundLink } from "../components/content/OutboundLink.jsx";
 import { StepGrid } from "../components/content/StepGrid.jsx";
 import { RoleTabs } from "../components/content/RoleTabs.jsx";
-import { StickyNarrative } from "../components/content/StickyNarrative.jsx";
+import { RubricTabs } from "../components/content/RubricTabs.jsx";
+import { Reveal } from "../components/content/Reveal.jsx";
 import { useHowItWorksStyles } from "../components/how-it-works/hiwStyles.js";
 import { ReviewConsoleDemo } from "../components/how-it-works/ReviewConsoleDemo.jsx";
 import { RUBRIC_PANELS } from "../components/how-it-works/rubricPanels.js";
 import { EXAMPLE_RESOURCE, getAggregatedStatus } from "../data/resources.js";
 import { PARTNERS } from "../data/partners.js";
-import { useRevealOnScroll } from "../lib/motion.js";
+import { usePageLayoutStyles } from "../design-system/pageLayout.js";
 
 const CSS = `
-.oer-home .oer-container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
-@media (max-width: 899px) { .oer-home .oer-container { padding: 0 24px; } }
-@media (max-width: 639px) { .oer-home .oer-container { padding: 0 16px; } }
-
-.oer-home .oer-section-y { padding-top: 72px; padding-bottom: 72px; }
-@media (max-width: 899px) { .oer-home .oer-section-y { padding-top: 56px; padding-bottom: 56px; } }
-@media (max-width: 639px) { .oer-home .oer-section-y { padding-top: 40px; padding-bottom: 40px; } }
-
-.oer-home .oer-h1 {
-  font-family: var(--font-heading); font-weight: var(--weight-display); font-size: 40px;
-  line-height: 1.1; letter-spacing: -0.02em; color: var(--text-default); margin: 0;
-  overflow-wrap: anywhere; min-width: 0;
-}
-@media (max-width: 899px) { .oer-home .oer-h1 { font-size: 34px; } }
-@media (max-width: 639px) { .oer-home .oer-h1 { font-size: 28px; } }
-
-.oer-home .oer-h2 {
-  font-family: var(--font-heading); font-weight: var(--weight-display); font-size: 32px;
-  line-height: 1.2; letter-spacing: -0.01em; color: var(--text-default); margin: 0;
-  overflow-wrap: anywhere; min-width: 0;
-}
-@media (max-width: 899px) { .oer-home .oer-h2 { font-size: 28px; } }
-@media (max-width: 639px) { .oer-home .oer-h2 { font-size: 24px; } }
-
-.oer-home .oer-eyebrow {
-  font-family: var(--font-label); font-size: 13px; font-weight: var(--weight-semibold);
-  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-brand); margin-bottom: 12px;
-}
-
 .oer-hero__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); gap: 48px; align-items: center; }
 .oer-hero__demo { min-width: 0; }
 .oer-hero__copy, .oer-hero__demo { opacity: 0; transform: translateY(16px); transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out); }
@@ -61,23 +34,10 @@ const CSS = `
   .oer-hero__copy, .oer-hero__demo { transition: none; opacity: 1; transform: none; }
 }
 
-.oer-reveal { opacity: 0; transform: translateY(12px); transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out); }
-.oer-reveal--in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { .oer-reveal { transition: none; } }
-
 .oer-problem__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 48px; align-items: start; }
 @media (max-width: 899px) { .oer-problem__grid { grid-template-columns: 1fr; gap: 32px; } }
 .oer-problem__badges { display: flex; align-items: center; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
 .oer-problem__arrow { color: var(--text-subtle); flex: none; }
-
-.oer-institutions__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; }
-.oer-institutions__grid .oer-instcard {
-  opacity: 0; transform: translateY(12px);
-  transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out);
-  transition-delay: calc(var(--stagger-index, 0) * var(--dur-stagger-step));
-}
-.oer-institutions--in .oer-instcard { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { .oer-institutions__grid .oer-instcard { transition: none; transition-delay: 0s; } }
 
 .oer-stats__row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 32px; }
 @media (max-width: 899px) { .oer-stats__row { grid-template-columns: repeat(2, 1fr); } }
@@ -188,7 +148,6 @@ const WORKFLOW_STEPS = [
 const ROLES = [
   { id: "author", label: "Author" },
   { id: "reviewer", label: "Reviewer" },
-  { id: "institution", label: "Institution" },
 ];
 
 const ROLE_PANELS = {
@@ -210,22 +169,12 @@ const ROLE_PANELS = {
     ],
     cta: { label: "Become a reviewer", href: "/community" },
   },
-  institution: {
-    body: "Give your faculty a library where “openly licensed” also means “independently checked.”",
-    benefits: [
-      "Contribute reviewer time and get transparent, versioned records in return",
-      "Point faculty at resources with a documented review, not just a license badge",
-      "Join a network of institutions already exchanging review capacity",
-    ],
-    cta: { label: "Partner with us", href: "/community" },
-  },
 };
 
 const RUBRIC_ITEMS = RUBRIC_PANELS.map((r) => ({
   id: r.id,
   label: r.label,
   summary: r.summary,
-  covers: r.covers.slice(0, 2),
 }));
 
 // The Accessibility rubric's real review history on the labeled example
@@ -233,29 +182,8 @@ const RUBRIC_ITEMS = RUBRIC_PANELS.map((r) => ({
 // "Public Review Record" data requirement.
 const EXAMPLE_TIMELINE = EXAMPLE_RESOURCE.rubricReviews.find((r) => r.rubricId === "accessibility")?.timeline || [];
 
-function Reveal({ children, as: Tag = "div", className = "", ...rest }) {
-  const [ref, isIn] = useRevealOnScroll();
-  return (
-    <Tag ref={ref} className={`oer-reveal${isIn ? " oer-reveal--in" : ""} ${className}`.trim()} {...rest}>
-      {children}
-    </Tag>
-  );
-}
-
-function InstitutionsGrid({ partners }) {
-  const [ref, isIn] = useRevealOnScroll();
-  return (
-    <div ref={ref} className={`oer-institutions__grid${isIn ? " oer-institutions--in" : ""}`}>
-      {partners.map((p, i) => (
-        <div key={p.name} style={{ "--stagger-index": Math.min(i, 5) }}>
-          <InstitutionCard name={p.name} logo={p.logo} alt={p.alt} />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export function Home() {
+  usePageLayoutStyles();
   useStyles();
   useHowItWorksStyles();
   const navigate = useNavigate();
@@ -269,7 +197,7 @@ export function Home() {
   const exampleStatus = getAggregatedStatus(EXAMPLE_RESOURCE);
 
   return (
-    <div className="oer-home">
+    <div className="oer-page">
       {/* 1 — Product-Focused Hero */}
       <section style={{ background: "var(--surface-subtle)", borderBottom: "1px solid var(--border-default)" }}>
         <div className={`oer-container oer-hero__grid${heroMounted ? " oer-hero--mounted" : ""}`} style={{ padding: "80px 32px 72px" }}>
@@ -404,7 +332,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* 6 — Sticky Product Narrative */}
+      {/* 6 — Rubric method (single rubric shown at a time) */}
       <section style={{ background: "var(--surface-subtle)", borderTop: "1px solid var(--border-default)" }}>
         <div className="oer-container oer-section-y">
           <div className="oer-eyebrow">The rubric method</div>
@@ -415,11 +343,11 @@ export function Home() {
             Every resource is checked against the same six lenses. Each carries a public, single-point
             standard, and reviewers respond with specific written comments rather than a bare number.
           </p>
-          <StickyNarrative items={RUBRIC_ITEMS} />
+          <RubricTabs items={RUBRIC_ITEMS} />
           <div style={{ marginTop: 48 }}>
-            <Button variant="primary" size="md" href={`/resource/${EXAMPLE_RESOURCE.id}`}>
-              See a full rubric review →
-            </Button>
+            <OutboundLink href="https://library.scottsdalecc.edu/c.php?g=1521072&p=11385521" variant="button">
+              Know more about O4PR rubric
+            </OutboundLink>
           </div>
         </div>
       </section>

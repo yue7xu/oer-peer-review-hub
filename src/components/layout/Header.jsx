@@ -209,7 +209,7 @@ export function Header() {
         className={`oer-header__drawer${drawerOpen ? " oer-header__drawer--open" : ""}`}
         aria-label="Mobile navigation"
         aria-hidden={!drawerOpen}
-        inert={!drawerOpen ? "" : undefined}
+        inert={!drawerOpen}
       >
         <div className="oer-header__drawer-head">
           <button type="button" className="oer-header__drawer-close" aria-label="Close menu" onClick={closeDrawer}>
