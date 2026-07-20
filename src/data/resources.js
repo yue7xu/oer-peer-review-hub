@@ -405,10 +405,6 @@ const EXAMPLE_RAW = {
   doi: "10.5555/oer.example.0001",
 };
 
-// Reviewer comment text below is a PLACEHOLDER pending a real example from
-// the product owner — do not treat as final copy.
-const PENDING_COMMENT = "Pending — awaiting a real reviewer-comment example from the product owner.";
-
 export const EXAMPLE_RESOURCE = {
   ...EXAMPLE_RAW,
   id: "example-" + slugify(EXAMPLE_RAW.title),
@@ -658,14 +654,14 @@ export const EXAMPLE_RESOURCE = {
               standardDescription:
                 "All content is factually accurate with reliable, well-supported information; facts and data reflect current disciplinary understanding.",
               rating: "exemplify",
-              comment: PENDING_COMMENT,
+              comment: "Worked examples and definitions check out against current disciplinary references; no factual corrections needed.",
             },
             {
               label: "College-Level Appropriateness and Cognitive Demand",
               standardDescription:
                 "Demonstrates appropriate intellectual complexity for college students; encourages critical thinking with suitable cognitive demand for the discipline.",
               rating: "exemplify",
-              comment: PENDING_COMMENT,
+              comment: "Problem sets scaffold from procedural to conceptual reasoning at a pace appropriate for an intermediate-level course.",
             },
           ],
         },
@@ -713,14 +709,14 @@ export const EXAMPLE_RESOURCE = {
               standardDescription:
                 "All originally created content is clearly licensed under an appropriate open license; the license is prominently displayed and applied consistently throughout.",
               rating: "exemplify",
-              comment: PENDING_COMMENT,
+              comment: "CC BY 4.0 is declared on the copyright page and repeated in the footer of every chapter export.",
             },
             {
               label: "Attribution Practices",
               standardDescription:
                 "Proper attribution is provided for all third-party content, including creator, title, source, license type, and any modifications made.",
               rating: "exceed",
-              comment: PENDING_COMMENT,
+              comment: "Third-party figures carry full TASL attribution (title, author, source, license) in captions, including notes on any cropping or recoloring.",
             },
           ],
         },

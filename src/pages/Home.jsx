@@ -1,15 +1,104 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/forms/Button.jsx";
 import { Input } from "../components/forms/Input.jsx";
 import { StatusBadge } from "../components/feedback/StatusBadge.jsx";
-import { ResourceCard } from "../components/content/ResourceCard.jsx";
+import { Badge } from "../components/feedback/Badge.jsx";
 import { FilterChip } from "../components/forms/FilterChip.jsx";
 import { PartnerLogoMarquee } from "../components/content/PartnerLogoMarquee.jsx";
-import { RESOURCES, getAggregatedStatus } from "../data/resources.js";
+import { InstitutionCard } from "../components/content/InstitutionCard.jsx";
+import { ReviewTimeline } from "../components/content/ReviewTimeline.jsx";
+import { StepGrid } from "../components/content/StepGrid.jsx";
+import { RoleTabs } from "../components/content/RoleTabs.jsx";
+import { StickyNarrative } from "../components/content/StickyNarrative.jsx";
+import { useHowItWorksStyles } from "../components/how-it-works/hiwStyles.js";
+import { ReviewConsoleDemo } from "../components/how-it-works/ReviewConsoleDemo.jsx";
+import { RUBRIC_PANELS } from "../components/how-it-works/rubricPanels.js";
+import { EXAMPLE_RESOURCE, getAggregatedStatus } from "../data/resources.js";
 import { PARTNERS } from "../data/partners.js";
+import { useRevealOnScroll } from "../lib/motion.js";
 
-const container = { maxWidth: 1280, margin: "0 auto", padding: "0 32px" };
+const CSS = `
+.oer-home .oer-container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
+@media (max-width: 899px) { .oer-home .oer-container { padding: 0 24px; } }
+@media (max-width: 639px) { .oer-home .oer-container { padding: 0 16px; } }
+
+.oer-home .oer-section-y { padding-top: 72px; padding-bottom: 72px; }
+@media (max-width: 899px) { .oer-home .oer-section-y { padding-top: 56px; padding-bottom: 56px; } }
+@media (max-width: 639px) { .oer-home .oer-section-y { padding-top: 40px; padding-bottom: 40px; } }
+
+.oer-home .oer-h1 {
+  font-family: var(--font-heading); font-weight: var(--weight-display); font-size: 40px;
+  line-height: 1.1; letter-spacing: -0.02em; color: var(--text-default); margin: 0;
+  overflow-wrap: anywhere; min-width: 0;
+}
+@media (max-width: 899px) { .oer-home .oer-h1 { font-size: 34px; } }
+@media (max-width: 639px) { .oer-home .oer-h1 { font-size: 28px; } }
+
+.oer-home .oer-h2 {
+  font-family: var(--font-heading); font-weight: var(--weight-display); font-size: 32px;
+  line-height: 1.2; letter-spacing: -0.01em; color: var(--text-default); margin: 0;
+  overflow-wrap: anywhere; min-width: 0;
+}
+@media (max-width: 899px) { .oer-home .oer-h2 { font-size: 28px; } }
+@media (max-width: 639px) { .oer-home .oer-h2 { font-size: 24px; } }
+
+.oer-home .oer-eyebrow {
+  font-family: var(--font-label); font-size: 13px; font-weight: var(--weight-semibold);
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-brand); margin-bottom: 12px;
+}
+
+.oer-hero__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); gap: 48px; align-items: center; }
+.oer-hero__demo { min-width: 0; }
+.oer-hero__copy, .oer-hero__demo { opacity: 0; transform: translateY(16px); transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out); }
+.oer-hero--mounted .oer-hero__copy, .oer-hero--mounted .oer-hero__demo { opacity: 1; transform: none; }
+@media (max-width: 899px) {
+  .oer-hero__grid { grid-template-columns: 1fr; gap: 32px; }
+  .oer-hero__copy { order: 0; }
+  .oer-hero__demo { order: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .oer-hero__copy, .oer-hero__demo { transition: none; opacity: 1; transform: none; }
+}
+
+.oer-reveal { opacity: 0; transform: translateY(12px); transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out); }
+.oer-reveal--in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .oer-reveal { transition: none; } }
+
+.oer-problem__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 48px; align-items: start; }
+@media (max-width: 899px) { .oer-problem__grid { grid-template-columns: 1fr; gap: 32px; } }
+.oer-problem__badges { display: flex; align-items: center; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+.oer-problem__arrow { color: var(--text-subtle); flex: none; }
+
+.oer-institutions__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; }
+.oer-institutions__grid .oer-instcard {
+  opacity: 0; transform: translateY(12px);
+  transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out);
+  transition-delay: calc(var(--stagger-index, 0) * var(--dur-stagger-step));
+}
+.oer-institutions--in .oer-instcard { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .oer-institutions__grid .oer-instcard { transition: none; transition-delay: 0s; } }
+
+.oer-stats__row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 32px; }
+@media (max-width: 899px) { .oer-stats__row { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 639px) { .oer-stats__row { grid-template-columns: 1fr; } }
+
+.oer-review-record__grid { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 48px; align-items: start; }
+@media (max-width: 899px) { .oer-review-record__grid { grid-template-columns: 1fr; gap: 32px; } }
+
+.oer-final-cta { display: flex; align-items: center; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
+`;
+
+let injected = false;
+function useStyles() {
+  if (!injected && typeof document !== "undefined") {
+    const el = document.createElement("style");
+    el.setAttribute("data-oer", "home");
+    el.textContent = CSS;
+    document.head.appendChild(el);
+    injected = true;
+  }
+}
 
 const iconProps = {
   width: 18,
@@ -42,14 +131,6 @@ function UsersIcon() {
     </svg>
   );
 }
-function RefreshIcon() {
-  return (
-    <svg {...iconProps}>
-      <path d="M21 12a9 9 0 1 1-2.64-6.36" />
-      <path d="M21 3v6h-6" />
-    </svg>
-  );
-}
 function CheckCircleIcon() {
   return (
     <svg {...iconProps}>
@@ -58,22 +139,11 @@ function CheckCircleIcon() {
     </svg>
   );
 }
-function LockIcon() {
+function ArrowRightIcon() {
   return (
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      style={{ flex: "none" }}
-    >
-      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="oer-problem__arrow">
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
     </svg>
   );
 }
@@ -88,154 +158,150 @@ const DISCIPLINES = [
   "Biology",
 ];
 
-const LIFECYCLE_STAGES = [
+// Condensed from ProcessSpine.jsx's 7 real steps (src/components/how-it-works/
+// ProcessSpine.jsx STEPS) down to 3 teaser beats — see docs/design/
+// LANDING_PAGE_ARCHITECTURE.md LP-OD-9 for the grouping this follows.
+const WORKFLOW_STEPS = [
   {
     number: "01",
-    title: "Submit",
     icon: <UploadIcon />,
-    copy: "The author submits an OER link, selects the relevant rubrics, and chooses whether the review stays private or may later be published.",
+    title: "Submit",
+    description:
+      "An author brings an OER they've already published and picks which of the six rubrics it should be reviewed on.",
   },
   {
     number: "02",
-    title: "Expert Review",
     icon: <UsersIcon />,
-    copy: "A coordinator matches qualified reviewers. Reviewers evaluate the resource using structured rubrics and evidence-linked comments, and OER can been found in here with",
-    badge: { status: "peer_reviewed", label: "Peer Reviewed" },
+    title: "Review against the rubrics",
+    description:
+      "A qualified reviewer works through it criterion by criterion in the Review Console, tying every comment to evidence in the resource itself.",
   },
   {
     number: "03",
-    title: "Feedback & Revision",
-    icon: <RefreshIcon />,
-    copy: "The author receives structured feedback and may accept the review, revise the resource, or request another independent round.",
-  },
-  {
-    number: "04",
-    title: "New Version Publish",
     icon: <CheckCircleIcon />,
-    copy: "The completed resource is marked",
-    badge: { status: "peer_reviewed_revised", label: "Peer Reviewed · Revised" },
-    after: "and full review loop has been closed. Adopters can confidently cite or remix this OER.",
+    title: "Publish & certify",
+    description:
+      "Once the author responds and the review loop closes, the resource carries a Peer Reviewed badge and its full history stays public.",
   },
 ];
 
-const QUALITY_STAGES = [
-  {
-    number: "01",
-    title: "Expert Reviewers",
-    copy: "Experienced educators from leading institutions must go through pertaining so that they can be qualified to attend evaluation on each resource against rigorous standards.",
-  },
-  {
-    number: "02",
-    title: "Structured Evaluation",
-    intro: "Six Open4PeerReview rubrics cover:",
-    list: ["accessibility", "copyright", "eLearning", "universal design for learning", "copy editing", "disciplinary appropriateness"],
-  },
-  {
-    number: "03",
-    title: "Evidence-Based Feedback",
-    copy: "Reviewers connect comments directly to specific locations in the resource so authors know exactly what to improve. Each annotation will come with constructive feedback and actionable suggestions.",
-  },
-  {
-    number: "04",
-    title: "Transparent Results",
-    copy: "Review summaries, criteria ratings, author responses and reviewer credentials* can be publicly visible.",
-    footnote: "*means pre-training credentials. Public reviewer may show name and institution.",
-  },
+const ROLES = [
+  { id: "author", label: "Author" },
+  { id: "reviewer", label: "Reviewer" },
+  { id: "institution", label: "Institution" },
 ];
 
-const FEATURED = RESOURCES.filter((r) => getAggregatedStatus(r) != null).slice(0, 3);
+const ROLE_PANELS = {
+  author: {
+    body: "Get a structured, criterion-by-criterion review instead of silence after you publish.",
+    benefits: [
+      "Pick which of the six rubrics apply to your resource",
+      "Every comment is tied to evidence in your OER, so you know exactly what to change",
+      "You decide if and when a completed review becomes public",
+    ],
+    cta: { label: "Submit a resource", href: "/community" },
+  },
+  reviewer: {
+    body: "Bring your expertise to resources that need it, and get credited for the work.",
+    benefits: [
+      "Complete rubric training before your first assignment, so every review meets the same bar",
+      "Work in one console instead of scattered docs and email threads",
+      "Your name and institution appear on the public record, if you choose to share it",
+    ],
+    cta: { label: "Become a reviewer", href: "/community" },
+  },
+  institution: {
+    body: "Give your faculty a library where “openly licensed” also means “independently checked.”",
+    benefits: [
+      "Contribute reviewer time and get transparent, versioned records in return",
+      "Point faculty at resources with a documented review, not just a license badge",
+      "Join a network of institutions already exchanging review capacity",
+    ],
+    cta: { label: "Partner with us", href: "/community" },
+  },
+};
+
+const RUBRIC_ITEMS = RUBRIC_PANELS.map((r) => ({
+  id: r.id,
+  label: r.label,
+  summary: r.summary,
+  covers: r.covers.slice(0, 2),
+}));
+
+// The Accessibility rubric's real review history on the labeled example
+// resource — reused verbatim, not re-authored, per SECTION_LIBRARY.md's
+// "Public Review Record" data requirement.
+const EXAMPLE_TIMELINE = EXAMPLE_RESOURCE.rubricReviews.find((r) => r.rubricId === "accessibility")?.timeline || [];
+
+function Reveal({ children, as: Tag = "div", className = "", ...rest }) {
+  const [ref, isIn] = useRevealOnScroll();
+  return (
+    <Tag ref={ref} className={`oer-reveal${isIn ? " oer-reveal--in" : ""} ${className}`.trim()} {...rest}>
+      {children}
+    </Tag>
+  );
+}
+
+function InstitutionsGrid({ partners }) {
+  const [ref, isIn] = useRevealOnScroll();
+  return (
+    <div ref={ref} className={`oer-institutions__grid${isIn ? " oer-institutions--in" : ""}`}>
+      {partners.map((p, i) => (
+        <div key={p.name} style={{ "--stagger-index": Math.min(i, 5) }}>
+          <InstitutionCard name={p.name} logo={p.logo} alt={p.alt} />
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function Home() {
+  useStyles();
+  useHowItWorksStyles();
   const navigate = useNavigate();
+  const [heroMounted, setHeroMounted] = useState(false);
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setHeroMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const exampleStatus = getAggregatedStatus(EXAMPLE_RESOURCE);
+
   return (
-    <>
-      {/* Hero */}
+    <div className="oer-home">
+      {/* 1 — Product-Focused Hero */}
       <section style={{ background: "var(--surface-subtle)", borderBottom: "1px solid var(--border-default)" }}>
-        <div style={{ ...container, padding: "80px 32px 72px" }}>
-          <div style={{ maxWidth: 760 }}>
-            <h1
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontWeight: "var(--weight-display)",
-                fontSize: 40,
-                lineHeight: 1.1,
-                letterSpacing: "-0.02em",
-                color: "var(--text-default)",
-                margin: "0 0 20px",
-              }}
-            >
-              Peer-reviewed OER, in one trusted library.
+        <div className={`oer-container oer-hero__grid${heroMounted ? " oer-hero--mounted" : ""}`} style={{ padding: "80px 32px 72px" }}>
+          <div className="oer-hero__copy">
+            <h1 className="oer-h1" style={{ marginBottom: 20 }}>
+              See the review before you adopt.
             </h1>
             <p style={{ fontSize: 20, lineHeight: 1.7, color: "var(--text-muted)", margin: "0 0 32px" }}>
-              Discover peer-reviewed textbooks, courses, and materials vetted by pre-trained reviewers
-              using evidence-based rubrics developed with AAC&amp;U. Every resource meets rigorous quality
-              standards — so you can adopt with confidence, teach with impact, and cite with clarity.
+              Every resource in the Hub carries a public, evidence-based peer review against six rubrics
+              developed with AAC&amp;U — real reviewers, criterion-by-criterion comments, nothing hidden
+              after publication.
             </p>
-            <div style={{ display: "flex", gap: 12, alignItems: "stretch", maxWidth: 640, marginBottom: 20 }}>
-              <div style={{ flex: 1 }}>
-                <Input
-                  placeholder="Search by title, author, discipline, or institution…"
-                  aria-label="Search resources"
-                />
-              </div>
-              <Button variant="primary" size="lg" href="/browse">
-                Search
-              </Button>
-            </div>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <Button variant="secondary" size="md" href="/browse">
+              <Button variant="primary" size="lg" href="/browse">
                 Browse Peer-Reviewed OERs
               </Button>
-              <Button variant="secondary" size="md" href="/solution">
-                Learn How It Works
+              <Button variant="secondary" size="lg" href="/solution">
+                See the Solution
               </Button>
             </div>
+          </div>
+          <div className="oer-hero__demo">
+            <ReviewConsoleDemo />
           </div>
         </div>
       </section>
 
-      {/* Stats */}
+      {/* 2 — Partner-Logo Showcase */}
       <section style={{ borderBottom: "1px solid var(--border-default)" }}>
-        <div
-          style={{
-            ...container,
-            padding: "40px 32px",
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: 24,
-          }}
-        >
-          {[
-            ["X", "Peer Reviewed resources"],
-            ["X", "Active reviewers"],
-            ["X", "Partner institutions"],
-            ["X", "Disciplines"],
-          ].map(([value, label]) => (
-            <div key={label}>
-              <div style={{ fontFamily: "var(--font-heading)", fontWeight: "var(--weight-display)", fontSize: 32, color: "var(--text-default)" }}>
-                {value}
-              </div>
-              <div style={{ fontFamily: "var(--font-label)", fontSize: 14, color: "var(--text-muted)" }}>{label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Our Partners */}
-      <section style={{ borderBottom: "1px solid var(--border-default)" }}>
-        <div style={{ ...container, padding: "56px 32px" }}>
+        <div className="oer-container oer-section-y" style={{ paddingTop: 56, paddingBottom: 56 }}>
           <div style={{ maxWidth: 700, marginBottom: 40 }}>
-            <h2
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontWeight: "var(--weight-display)",
-                fontSize: 32,
-                lineHeight: 1.2,
-                letterSpacing: "-0.01em",
-                color: "var(--text-default)",
-                margin: "0 0 12px",
-              }}
-            >
+            <h2 className="oer-h2" style={{ marginBottom: 12 }}>
               Our Partners
             </h2>
             <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>
@@ -246,325 +312,223 @@ export function Home() {
         </div>
       </section>
 
-      {/* The lifecycle */}
-      <section id="how-it-works">
-        <div style={{ ...container, padding: "72px 32px" }}>
-          <div style={{ maxWidth: 700, marginBottom: 48 }}>
-            <div
-              style={{
-                fontFamily: "var(--font-label)",
-                fontSize: 13,
-                fontWeight: "var(--weight-semibold)",
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                color: "var(--text-brand)",
-                marginBottom: 12,
-              }}
-            >
-              The Lifecycle
+      {/* 3 — Problem & Outcome */}
+      <Reveal as="section">
+        <div className="oer-container oer-section-y">
+          <div className="oer-eyebrow">Why review matters</div>
+          <div className="oer-problem__grid">
+            <div>
+              <h2 className="oer-h2" style={{ marginBottom: 16 }}>
+                Open doesn&apos;t tell you if it&apos;s any good.
+              </h2>
+              <p style={{ fontSize: 18, lineHeight: 1.7, color: "var(--text-muted)", margin: 0 }}>
+                Anyone can publish an open educational resource. Almost nothing about the license tells
+                you whether it&apos;s accessible, accurate, current, or classroom-ready — so adopting one
+                usually means trusting a stranger&apos;s word.
+              </p>
             </div>
-            <h2
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontWeight: "var(--weight-display)",
-                fontSize: 32,
-                lineHeight: 1.2,
-                letterSpacing: "-0.01em",
-                color: "var(--text-default)",
-                margin: "0 0 12px",
-              }}
-            >
-              How O4PR Peer Review Works
+            <div>
+              <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: "var(--weight-display)", fontSize: 20, color: "var(--text-default)", margin: "0 0 12px" }}>
+                What changes with the Hub
+              </h3>
+              <p style={{ fontSize: 18, lineHeight: 1.7, color: "var(--text-muted)", margin: 0 }}>
+                The Hub puts a structured, six-rubric peer review in front of every resource, done by
+                qualified reviewers, with the full record left public after publication. Adopting one
+                means trusting a documented process, not a guess.
+              </p>
+              <div className="oer-problem__badges">
+                <StatusBadge status="unreviewed" />
+                <ArrowRightIcon />
+                <StatusBadge status="peer_reviewed_revised" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      {/* 4 — Three-Step Review Workflow */}
+      <section style={{ background: "var(--surface-subtle)", borderTop: "1px solid var(--border-default)", borderBottom: "1px solid var(--border-default)" }}>
+        <div className="oer-container oer-section-y">
+          <div style={{ maxWidth: 700, marginBottom: 40 }}>
+            <h2 className="oer-h2" style={{ marginBottom: 12 }}>
+              How a resource gets reviewed
             </h2>
             <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>
-              A concise overview of the complete open educational resource review lifecycle, from
-              submission to certification.
+              A condensed look at the full lifecycle — every step, criterion, and status is detailed on
+              the Solution page.
             </p>
           </div>
-
-          <div style={{ background: "var(--surface-subtle)", borderRadius: "var(--radius-lg)", padding: 32 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
-              {LIFECYCLE_STAGES.map((stage) => (
-                <div key={stage.number}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                    <div
-                      style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: "var(--radius-md)",
-                        background: "var(--surface-default)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "var(--text-default)",
-                      }}
-                    >
-                      {stage.icon}
-                    </div>
-                    <span
-                      style={{
-                        fontFamily: "var(--font-label)",
-                        fontSize: 13,
-                        fontWeight: "var(--weight-semibold)",
-                        color: "var(--text-subtle)",
-                      }}
-                    >
-                      {stage.number}
-                    </span>
-                  </div>
-                  <h3
-                    style={{
-                      fontFamily: "var(--font-heading)",
-                      fontWeight: "var(--weight-display)",
-                      fontSize: 20,
-                      lineHeight: 1.4,
-                      color: "var(--text-default)",
-                      margin: "0 0 8px",
-                    }}
-                  >
-                    {stage.title}
-                  </h3>
-                  <p style={{ fontSize: 15, lineHeight: 1.6, color: "var(--text-muted)", margin: stage.badge ? "0 0 10px" : 0 }}>
-                    {stage.copy}
-                  </p>
-                  {stage.badge && (
-                    <div style={{ marginBottom: stage.after ? 10 : 0 }}>
-                      <StatusBadge status={stage.badge.status}>{stage.badge.label}</StatusBadge>
-                    </div>
-                  )}
-                  {stage.after && (
-                    <p style={{ fontSize: 15, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>{stage.after}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <hr style={{ border: "none", borderTop: "1px solid var(--border-default)", margin: "28px 0 20px" }} />
-
-            <p style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, lineHeight: 1.6, color: "var(--text-subtle)", margin: "0 0 4px" }}>
-              <LockIcon /> Private by default. Authors decide whether completed review results are published.
-            </p>
-            <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-subtle)", margin: 0 }}>
-              We also provide student review and self-review, but only reviews by qualified reviewers can get
-              badges.
-            </p>
-          </div>
-
-          <div style={{ marginTop: 28 }}>
+          <StepGrid steps={WORKFLOW_STEPS} />
+          <div style={{ marginTop: 32 }}>
             <Button variant="primary" size="md" href="/solution">
-              See the detailed process →
+              See the full process →
             </Button>
           </div>
         </div>
       </section>
 
-      {/* How we ensure quality */}
-      <section style={{ background: "var(--surface-subtle)", borderTop: "1px solid var(--border-default)" }}>
-        <div style={{ ...container, padding: "72px 32px" }}>
-          <h2
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontWeight: "var(--weight-display)",
-              fontSize: 32,
-              lineHeight: 1.2,
-              letterSpacing: "-0.01em",
-              color: "var(--text-default)",
-              margin: 0,
-            }}
-          >
-            How We Ensure Quality
+      {/* Search & browse by discipline — search relocated out of the hero */}
+      <section style={{ borderBottom: "1px solid var(--border-default)" }}>
+        <div className="oer-container oer-section-y" style={{ paddingTop: 56, paddingBottom: 56 }}>
+          <h2 className="oer-h2" style={{ marginBottom: 24 }}>
+            Search the library
           </h2>
+          <div style={{ display: "flex", gap: 12, alignItems: "stretch", maxWidth: 640, marginBottom: 28 }}>
+            <div style={{ flex: 1 }}>
+              <Input placeholder="Search by title, author, discipline, or institution…" aria-label="Search resources" />
+            </div>
+            <Button variant="primary" size="lg" href="/browse">
+              Search
+            </Button>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            {DISCIPLINES.map((label) => (
+              <FilterChip key={label} label={label} onClick={() => navigate("/browse")} />
+            ))}
+          </div>
+        </div>
+      </section>
 
-          <hr style={{ border: "none", borderTop: "1px solid var(--border-strong)", margin: "24px 0 32px" }} />
+      {/* 5 — Role-Based Value Presentation */}
+      <section>
+        <div className="oer-container oer-section-y">
+          <div style={{ maxWidth: 700, marginBottom: 32 }}>
+            <h2 className="oer-h2" style={{ marginBottom: 12 }}>
+              Built for every role in the process
+            </h2>
+            <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>
+              Select a role to see what the Hub gives you specifically.
+            </p>
+          </div>
+          <RoleTabs roles={ROLES} panels={ROLE_PANELS} />
+        </div>
+      </section>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24, marginBottom: 28 }}>
-            {QUALITY_STAGES.map((stage) => (
-              <div key={stage.number}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                  <div
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: "var(--radius-sm)",
-                      background: "var(--surface-default)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flex: "none",
-                    }}
-                  >
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--text-default)" }} />
-                  </div>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-label)",
-                      fontSize: 13,
-                      fontWeight: "var(--weight-semibold)",
-                      color: "var(--text-subtle)",
-                    }}
-                  >
-                    {stage.number}
-                  </span>
+      {/* 6 — Sticky Product Narrative */}
+      <section style={{ background: "var(--surface-subtle)", borderTop: "1px solid var(--border-default)" }}>
+        <div className="oer-container oer-section-y">
+          <div className="oer-eyebrow">The rubric method</div>
+          <h2 className="oer-h2" style={{ marginBottom: 16 }}>
+            Six rubrics, one honest method.
+          </h2>
+          <p style={{ fontSize: 18, lineHeight: 1.7, color: "var(--text-muted)", maxWidth: 760, margin: "0 0 48px" }}>
+            Every resource is checked against the same six lenses. Each carries a public, single-point
+            standard, and reviewers respond with specific written comments rather than a bare number.
+          </p>
+          <StickyNarrative items={RUBRIC_ITEMS} />
+          <div style={{ marginTop: 48 }}>
+            <Button variant="primary" size="md" href={`/resource/${EXAMPLE_RESOURCE.id}`}>
+              See a full rubric review →
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* 7 — Public Review Record */}
+      <Reveal as="section" style={{ borderTop: "1px solid var(--border-default)" }}>
+        <div className="oer-container oer-section-y">
+          <h2 className="oer-h2" style={{ marginBottom: 12 }}>
+            A real, public review record
+          </h2>
+          <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text-muted)", maxWidth: 700, margin: "0 0 40px" }}>
+            &quot;Transparent&quot; isn&apos;t just a claim — here&apos;s one resource&apos;s complete,
+            unedited review history.
+          </p>
+          <div className="oer-review-record__grid">
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 16,
+                  padding: "10px 16px",
+                  background: "var(--surface-default)",
+                  border: "1px solid var(--border-default)",
+                  borderRadius: "var(--radius-lg)",
+                }}
+              >
+                <Badge variant="solid">Example</Badge>
+                <span style={{ fontFamily: "var(--font-label)", fontSize: 13, color: "var(--text-muted)" }}>
+                  Illustrative — not part of the Hub&apos;s live catalog yet.
+                </span>
+              </div>
+              <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: "var(--weight-display)", fontSize: 24, color: "var(--text-default)", margin: "0 0 8px" }}>
+                {EXAMPLE_RESOURCE.title}
+              </h3>
+              <p style={{ fontSize: 14, color: "var(--text-subtle)", margin: "0 0 16px" }}>
+                {EXAMPLE_RESOURCE.authorList.join(", ")} · {EXAMPLE_RESOURCE.primarySubject}
+              </p>
+              {exampleStatus && (
+                <div style={{ marginBottom: 20 }}>
+                  <StatusBadge status={exampleStatus} />
                 </div>
-                <h3
-                  style={{
-                    fontFamily: "var(--font-heading)",
-                    fontWeight: "var(--weight-display)",
-                    fontSize: 18,
-                    lineHeight: 1.4,
-                    color: "var(--text-default)",
-                    margin: "0 0 8px",
-                  }}
-                >
-                  {stage.title}
-                </h3>
-                {stage.intro && (
-                  <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-muted)", margin: "0 0 4px" }}>{stage.intro}</p>
-                )}
-                {stage.list && (
-                  <ul style={{ margin: 0, paddingLeft: 18, fontSize: 14, lineHeight: 1.6, color: "var(--text-muted)" }}>
-                    {stage.list.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                )}
-                {stage.copy && (
-                  <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>{stage.copy}</p>
-                )}
-                {stage.footnote && (
-                  <p style={{ fontSize: 14, lineHeight: 1.6, color: "var(--text-muted)", margin: "12px 0 0" }}>{stage.footnote}</p>
-                )}
+              )}
+              <Button variant="secondary" size="md" href={`/resource/${EXAMPLE_RESOURCE.id}`}>
+                View this resource&apos;s full review →
+              </Button>
+            </div>
+            <ReviewTimeline items={EXAMPLE_TIMELINE} />
+          </div>
+        </div>
+      </Reveal>
+
+      {/* 8 — Community & Trust */}
+      <section style={{ background: "var(--surface-subtle)", borderTop: "1px solid var(--border-default)" }}>
+        <div className="oer-container oer-section-y">
+          <h2 className="oer-h2" style={{ marginBottom: 12 }}>
+            A growing, active network
+          </h2>
+          <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text-muted)", maxWidth: 700, margin: "0 0 16px" }}>
+            Institutions and projects already contributing reviewed materials and reviewer time.
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 32 }}>
+            <Badge variant="secondary">Demo data</Badge>
+            <span style={{ fontFamily: "var(--font-label)", fontSize: 13, color: "var(--text-subtle)" }}>
+              Illustrative figures — real reporting numbers aren&apos;t published yet.
+            </span>
+          </div>
+          <div className="oer-stats__row" style={{ marginTop: 0, marginBottom: 40 }}>
+            {[
+              ["30+", "Peer Reviewed resources"],
+              ["12+", "Active reviewers"],
+              ["13", "Partner institutions"],
+              ["8", "Disciplines"],
+            ].map(([value, label]) => (
+              <div key={label}>
+                <div style={{ fontFamily: "var(--font-heading)", fontWeight: "var(--weight-display)", fontSize: 32, color: "var(--text-default)" }}>
+                  {value}
+                </div>
+                <div style={{ fontFamily: "var(--font-label)", fontSize: 14, color: "var(--text-muted)" }}>{label}</div>
               </div>
             ))}
           </div>
-          <Button variant="secondary" size="md" href="/about">
-            Learn about the review standards →
-          </Button>
-        </div>
-      </section>
-
-      {/* Browse by discipline */}
-      <section style={{ borderTop: "1px solid var(--border-default)" }}>
-        <div style={{ ...container, padding: "72px 32px" }}>
-          <h2
-            style={{
-              fontFamily: "var(--font-heading)",
-              fontWeight: "var(--weight-display)",
-              fontSize: 32,
-              lineHeight: 1.2,
-              letterSpacing: "-0.01em",
-              color: "var(--text-default)",
-              margin: "0 0 32px",
-            }}
-          >
-            Browse by discipline
-          </h2>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            {DISCIPLINES.map((label) => (
-              <FilterChip
-                key={label}
-                label={label}
-                onClick={() => navigate("/browse")}
-                onRemove={() => navigate("/browse")}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured resources */}
-      <section
-        style={{
-          background: "var(--surface-subtle)",
-          borderTop: "1px solid var(--border-default)",
-          borderBottom: "1px solid var(--border-default)",
-        }}
-      >
-        <div style={{ ...container, padding: "72px 32px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-end",
-              justifyContent: "space-between",
-              gap: 24,
-              marginBottom: 36,
-            }}
-          >
-            <h2
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontWeight: "var(--weight-display)",
-                fontSize: 32,
-                lineHeight: 1.2,
-                letterSpacing: "-0.01em",
-                color: "var(--text-default)",
-                margin: 0,
-              }}
-            >
-              Recently reviewed
-            </h2>
-            <Link to="/browse" style={{ fontFamily: "var(--font-label)", fontWeight: "var(--weight-medium)", fontSize: 14 }}>
-              Browse all resources →
+          <InstitutionsGrid partners={PARTNERS} />
+          <div style={{ marginTop: 32 }}>
+            <Link to="/community" style={{ fontFamily: "var(--font-label)", fontWeight: "var(--weight-medium)", fontSize: 14 }}>
+              See all partner institutions →
             </Link>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
-            {FEATURED.map((r) => (
-              <ResourceCard
-                key={r.id}
-                title={r.title}
-                href={`/resource/${r.id}`}
-                authors={r.authors}
-                abstract={r.abstract}
-                discipline={r.primarySubject}
-                license={r.license}
-                status={getAggregatedStatus(r)}
-                reviewCount={r.rubricReviews.length}
-                sourceHref={r.sourceUrl}
-              />
-            ))}
-          </div>
         </div>
       </section>
 
-      {/* Institutions CTA */}
-      <section style={{ background: "var(--brand-primary)" }}>
-        <div
-          style={{
-            ...container,
-            padding: "64px 32px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 40,
-            flexWrap: "wrap",
-          }}
-        >
+      {/* 9 — Final CTA */}
+      <Reveal as="section" style={{ background: "var(--brand-primary)" }}>
+        <div className="oer-container oer-final-cta" style={{ padding: "64px 32px" }}>
           <div style={{ maxWidth: 620 }}>
-            <h2
-              style={{
-                fontFamily: "var(--font-heading)",
-                fontWeight: "var(--weight-display)",
-                fontSize: 32,
-                lineHeight: 1.2,
-                letterSpacing: "-0.01em",
-                color: "var(--text-inverse)",
-                margin: "0 0 12px",
-              }}
-            >
-              Bring transparent review to your institution
+            <h2 className="oer-h2" style={{ color: "var(--text-inverse)", marginBottom: 12 }}>
+              Ready to see review done in the open?
             </h2>
             <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--color-on-ink-muted)", margin: 0 }}>
-              Join 13 universities and colleges contributing reviewed materials and reviewer time to the
-              OER community.
+              Join authors, reviewers, and institutions building a transparent alternative to
+              take-our-word-for-it OER.
             </p>
           </div>
-          <div style={{ display: "flex", gap: 12 }}>
-            <Button variant="secondary" size="lg" href="/community">
-              Explore community
-            </Button>
-          </div>
+          <Button variant="secondary" size="lg" href="/community">
+            Explore community
+          </Button>
         </div>
-      </section>
-    </>
+      </Reveal>
+    </div>
   );
 }

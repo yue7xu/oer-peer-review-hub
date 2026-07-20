@@ -26,7 +26,7 @@ function CapIcon() {
 }
 
 /**
- * How It Works — served at /solution (nav label: How It Works).
+ * Solution — served at /solution (nav label: Solution).
  * Structure/copy/interaction from design_handoff/detailed-process-final.html;
  * visual system aligned with Home / About / Community (design.md).
  */
@@ -41,7 +41,7 @@ export function Solution() {
         <div className="hiw-hero__inner">
           <div className="hiw-hero__grid">
             <div className="hiw-hero__copy">
-              <div className="hiw-eyebrow">How It Works</div>
+              <div className="hiw-eyebrow">Solution</div>
               <h1 className="hiw-h1">
                 Peer review for open educational resources — and the workspace built to run it.
               </h1>

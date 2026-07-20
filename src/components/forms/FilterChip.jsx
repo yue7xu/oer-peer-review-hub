@@ -35,26 +35,34 @@ function useStyles() {
 
 /**
  * Filter chip — a toggleable pill for browse facets. When `onRemove` is set it
- * shows an × and acts as an active/removable filter token.
+ * shows an × and acts as an active/removable filter token. Also doubles as a
+ * tab trigger (pass `role="tab"` + `aria-selected` via rest props, e.g.
+ * RoleTabs.jsx) — forwards its ref so callers can drive roving focus.
  */
-export function FilterChip({
-  label,
-  selected = false,
-  count = null,
-  onRemove = null,
-  onClick,
-  className = "",
-  ...rest
-}) {
+export const FilterChip = React.forwardRef(function FilterChip(
+  {
+    label,
+    selected = false,
+    count = null,
+    onRemove = null,
+    onClick,
+    className = "",
+    role,
+    ...rest
+  },
+  ref,
+) {
   useStyles();
   const cls = ["oer-chip", selected && "oer-chip--selected", className]
     .filter(Boolean)
     .join(" ");
   return (
     <button
+      ref={ref}
       type="button"
+      role={role}
       className={cls}
-      aria-pressed={selected}
+      aria-pressed={role ? undefined : selected}
       onClick={onClick}
       {...rest}
     >
@@ -77,4 +85,4 @@ export function FilterChip({
       )}
     </button>
   );
-}
+});

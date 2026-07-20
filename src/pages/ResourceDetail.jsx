@@ -135,6 +135,10 @@ export function ResourceDetail() {
               {/* Layer 2: Review Coverage overview */}
               <section>
                 <h2 style={h2Style}>Peer review</h2>
+                <p style={{ fontFamily: "var(--font-label)", fontSize: 13, color: "var(--text-subtle)", margin: "-6px 0 20px" }}>
+                  Reviewer names and comments shown here are illustrative demo data — no reviewer has
+                  actually been assigned to this submission yet.
+                </p>
                 <ReviewCoverageTable rubricReviews={resource.rubricReviews} />
               </section>
 
