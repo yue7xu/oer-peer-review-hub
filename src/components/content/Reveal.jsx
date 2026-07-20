@@ -1,5 +1,6 @@
 import React from "react";
 import { useRevealOnScroll } from "../../lib/motion.js";
+import { injectStyles } from "../../lib/injectStyles.js";
 
 const CSS = `
 .oer-reveal { opacity: 0; transform: translateY(12px); transition: opacity var(--dur-long) var(--ease-out), transform var(--dur-long) var(--ease-out); }
@@ -7,15 +8,8 @@ const CSS = `
 @media (prefers-reduced-motion: reduce) { .oer-reveal { transition: none; } }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "reveal");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("reveal", CSS);
 }
 
 /**

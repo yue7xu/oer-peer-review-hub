@@ -2,6 +2,7 @@ import React from "react";
 import { LogoPlaceholder } from "./LogoPlaceholder.jsx";
 import { Badge } from "../feedback/Badge.jsx";
 import { OutboundLink } from "./OutboundLink.jsx";
+import { injectStyles } from "../../lib/injectStyles.js";
 
 /* Same card family as InstitutionCard.jsx — flat surface-subtle fill, no
    shadow, radius-lg, height:100% to fill its grid cell, logo-then-name
@@ -26,15 +27,8 @@ const CSS = `
 }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "projectcard");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("projectcard", CSS);
 }
 
 /**

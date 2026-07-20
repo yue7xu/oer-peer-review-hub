@@ -19,6 +19,7 @@ import { RUBRIC_PANELS } from "../components/how-it-works/rubricPanels.js";
 import { EXAMPLE_RESOURCE, getAggregatedStatus } from "../data/resources.js";
 import { PARTNERS } from "../data/partners.js";
 import { usePageLayoutStyles } from "../design-system/pageLayout.js";
+import { injectStyles } from "../lib/injectStyles.js";
 
 const CSS = `
 .oer-hero__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); gap: 48px; align-items: center; }
@@ -49,15 +50,8 @@ const CSS = `
 .oer-final-cta { display: flex; align-items: center; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "home");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("home", CSS);
 }
 
 const iconProps = {

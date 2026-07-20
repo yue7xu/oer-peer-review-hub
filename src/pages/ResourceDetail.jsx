@@ -8,10 +8,21 @@ import { RubricSidebarNav } from "../components/content/RubricSidebarNav.jsx";
 import { OutboundLink } from "../components/content/OutboundLink.jsx";
 import { Button } from "../components/forms/Button.jsx";
 import { getResourceById } from "../data/resources.js";
+import { injectStyles } from "../lib/injectStyles.js";
 
 const container = { maxWidth: 1280, margin: "0 auto" };
 
+const CSS = `
+.oer-detail-institution-link { text-decoration: none; }
+.oer-detail-institution-link:hover { text-decoration: underline; }
+`;
+
+function useStyles() {
+  injectStyles("resourcedetail", CSS);
+}
+
 export function ResourceDetail() {
+  useStyles();
   const { id } = useParams();
   const resource = getResourceById(id);
 
@@ -35,12 +46,21 @@ export function ResourceDetail() {
 
   const details = [
     ["Material type", resource.bookInfo || "Not specified"],
+    [
+      "Contributed by",
+      resource.institution ? (
+        <Link key="contributed-by" to="/community" className="oer-detail-institution-link">
+          {resource.institution}
+        </Link>
+      ) : (
+        "Not specified"
+      ),
+    ],
     ["Licence", resource.license || "Not specified"],
     ["Publish date", resource.publishDate || "Not specified"],
     ["Last updated", resource.lastUpdated || "Not specified"],
     ["Language(s)", resource.language || "Not specified"],
   ];
-  if (resource.doi) details.push(["DOI", resource.doi]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
@@ -143,8 +163,8 @@ export function ResourceDetail() {
               </section>
 
               {/* Layer 3: one section per rubric reviewed */}
-              {resource.rubricReviews.map((rr) => (
-                <RubricReviewSection key={rr.rubricId} rubricReview={rr} />
+              {resource.rubricReviews.map((rr, idx) => (
+                <RubricReviewSection key={rr.rubricId} rubricReview={rr} isFirstSection={idx === 0} />
               ))}
             </>
           ) : (
@@ -180,8 +200,21 @@ export function ResourceDetail() {
           )}
         </main>
 
-        {/* Sidebar */}
-        <aside style={{ alignSelf: "start", display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 88 }}>
+        {/* Sidebar — capped to the viewport height and independently
+            scrollable, so scrolling it never scrolls the main column (and
+            vice versa) once its own content overflows */}
+        <aside
+          style={{
+            alignSelf: "start",
+            display: "flex",
+            flexDirection: "column",
+            gap: 20,
+            position: "sticky",
+            top: 88,
+            maxHeight: "calc(100vh - 112px)",
+            overflowY: "auto",
+          }}
+        >
           {/* Outbound checkout */}
           <div style={{ borderRadius: "var(--radius-lg)", padding: 24, background: "var(--surface-default)", boxShadow: "var(--shadow-subtle)" }}>
             <div style={{ fontFamily: "var(--font-label)", fontSize: 13, color: "var(--text-subtle)", marginBottom: 14 }}>

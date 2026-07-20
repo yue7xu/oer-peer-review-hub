@@ -4,6 +4,8 @@
 // (fixed 32px gutter and fixed-px headings with no narrower-viewport
 // override anywhere in the codebase) into one reusable place instead of
 // repeating the same CSS block per page.
+import { injectStyles } from "../lib/injectStyles.js";
+
 const CSS = `
 .oer-page .oer-container { max-width: 1280px; margin: 0 auto; padding: 0 32px; }
 @media (max-width: 899px) { .oer-page .oer-container { padding: 0 24px; } }
@@ -41,13 +43,6 @@ const CSS = `
 @media (max-width: 639px) { .oer-page .oer-h3 { font-size: 18px; } }
 `;
 
-let injected = false;
 export function usePageLayoutStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "pagelayout");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("pagelayout", CSS);
 }

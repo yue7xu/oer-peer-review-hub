@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Input } from "../forms/Input.jsx";
 import { Select } from "../forms/Select.jsx";
 import { Button } from "../forms/Button.jsx";
+import { injectStyles } from "../../lib/injectStyles.js";
 
 const ROLE_OPTIONS = ["An educator", "An author", "A reviewer", "An institution", "Press / other"];
 
@@ -10,15 +11,8 @@ const CSS = `
 @media (max-width: 479px) { .oer-contactform__row { grid-template-columns: 1fr; } }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "contactformcard");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("contactformcard", CSS);
 }
 
 /**

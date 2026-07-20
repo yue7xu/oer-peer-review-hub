@@ -4,6 +4,7 @@ import { ContactFormCard } from "../components/content/ContactFormCard.jsx";
 import { Reveal } from "../components/content/Reveal.jsx";
 import { CONTACT_CHANNELS } from "../data/contact.js";
 import { usePageLayoutStyles } from "../design-system/pageLayout.js";
+import { injectStyles } from "../lib/injectStyles.js";
 
 const CSS = `
 .oer-about__principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -14,15 +15,8 @@ const CSS = `
 @media (max-width: 899px) { .oer-about__contact-grid { grid-template-columns: 1fr; gap: 40px; } }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "about");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("about", CSS);
 }
 
 const PRINCIPLES = [

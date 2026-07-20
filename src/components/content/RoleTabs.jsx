@@ -1,7 +1,8 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FilterChip } from "../forms/FilterChip.jsx";
 import { Button } from "../forms/Button.jsx";
 import { prefersReducedMotion } from "../../lib/motion.js";
+import { injectStyles } from "../../lib/injectStyles.js";
 
 /** Same disclosure timing as RubricMethod.jsx — reused verbatim per
  * SECTION_LIBRARY.md's "Role-Based Tabs" contract. */
@@ -22,15 +23,8 @@ const CSS = `
 }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "roletabs");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("roletabs", CSS);
 }
 
 /**
@@ -48,7 +42,6 @@ export function RoleTabs({ roles, panels }) {
   const shellRef = useRef(null);
   const panelRef = useRef(null);
   const timers = useRef([]);
-  const heightRef = useRef(0);
   const tabRefs = useRef({});
 
   const clearTimers = () => {
@@ -60,14 +53,14 @@ export function RoleTabs({ roles, panels }) {
     timers.current.push(id);
   };
 
+  useEffect(() => clearTimers, []);
+
   const measure = () => (panelRef.current ? Math.ceil(panelRef.current.getBoundingClientRect().height) : 0);
 
   useLayoutEffect(() => {
     const shell = shellRef.current;
     if (!shell) return;
-    const to = measure();
-    shell.style.height = `${to}px`;
-    heightRef.current = to;
+    shell.style.height = `${measure()}px`;
   }, [visibleId, contentShown]);
 
   const selectRole = (id) => {

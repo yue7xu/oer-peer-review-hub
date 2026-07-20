@@ -1,4 +1,5 @@
 import React from "react";
+import { injectStyles } from "../../lib/injectStyles.js";
 
 const CSS = `
 .oer-chip {
@@ -22,15 +23,8 @@ const CSS = `
 .oer-chip--selected .oer-chip__count { color: var(--text-brand); }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "filterchip");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("filterchip", CSS);
 }
 
 /**

@@ -280,9 +280,11 @@ export function Browse() {
             </div>
           </div>
 
-          {/* Active filters — reflects applied (not pending) selections */}
+          {/* Active filters — reflects applied (not pending) selections, so
+              the user always knows what's narrowing the list right now,
+              independent of whatever's checked-but-not-applied in the sidebar */}
           {activeGroups.length > 0 && (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 24 }}>
               {activeGroups.map(({ group, values }) => {
                 const joined = values.join(", ");
                 const display = values.length > 1 && joined.length > 20 ? `${values[0]} +${values.length - 1}` : joined;
@@ -300,6 +302,23 @@ export function Browse() {
                   />
                 );
               })}
+              <button
+                type="button"
+                onClick={clearAll}
+                style={{
+                  fontFamily: "var(--font-label)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  color: "var(--text-muted)",
+                  background: "none",
+                  border: "none",
+                  padding: "0 4px",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                }}
+              >
+                Clear all
+              </button>
             </div>
           )}
 
