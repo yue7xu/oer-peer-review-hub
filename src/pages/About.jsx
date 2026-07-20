@@ -1,9 +1,29 @@
 import React from "react";
 import { ContactChannelList } from "../components/content/ContactChannelList.jsx";
 import { ContactFormCard } from "../components/content/ContactFormCard.jsx";
+import { Reveal } from "../components/content/Reveal.jsx";
 import { CONTACT_CHANNELS } from "../data/contact.js";
+import { usePageLayoutStyles } from "../design-system/pageLayout.js";
 
-const container = { maxWidth: 1280, margin: "0 auto" };
+const CSS = `
+.oer-about__principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+@media (max-width: 899px) { .oer-about__principles { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 639px) { .oer-about__principles { grid-template-columns: 1fr; } }
+
+.oer-about__contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 64px; }
+@media (max-width: 899px) { .oer-about__contact-grid { grid-template-columns: 1fr; gap: 40px; } }
+`;
+
+let injected = false;
+function useStyles() {
+  if (!injected && typeof document !== "undefined") {
+    const el = document.createElement("style");
+    el.setAttribute("data-oer", "about");
+    el.textContent = CSS;
+    document.head.appendChild(el);
+    injected = true;
+  }
+}
 
 const PRINCIPLES = [
   {
@@ -21,14 +41,16 @@ const PRINCIPLES = [
 ];
 
 export function About() {
+  usePageLayoutStyles();
+  useStyles();
   return (
-    <>
+    <div className="oer-page">
       {/* Hero */}
       <section style={{ background: "var(--surface-subtle)", borderBottom: "1px solid var(--border-default)" }}>
-        <div style={{ ...container, padding: "72px 32px" }}>
+        <div className="oer-container oer-section-y">
           <div style={{ maxWidth: 760 }}>
-            <div style={eyebrowStyle}>About</div>
-            <h1 style={h1Style}>Trustworthy open resources, through review anyone can see.</h1>
+            <div className="oer-eyebrow">About</div>
+            <h1 className="oer-h1">Trustworthy open resources, through review anyone can see.</h1>
             <p style={{ fontSize: 20, lineHeight: 1.7, color: "var(--text-muted)", margin: 0 }}>
               The Hub exists to make open educational resources as credible as anything behind a paywall —
               by putting an honest, versioned peer review process in front of every educator who has to
@@ -39,33 +61,27 @@ export function About() {
       </section>
 
       {/* Principles */}
-      <section>
-        <div style={{ ...container, padding: "72px 32px" }}>
-          <h2 style={{ ...h2Style, marginBottom: 48 }}>What we stand for</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+      <Reveal as="section">
+        <div className="oer-container oer-section-y">
+          <h2 className="oer-h2" style={{ marginBottom: 48 }}>
+            What we stand for
+          </h2>
+          <div className="oer-about__principles">
             {PRINCIPLES.map((p) => (
               <div key={p.title}>
-                <h3 style={h3Style}>{p.title}</h3>
+                <h3 className="oer-h3">{p.title}</h3>
                 <p style={{ fontSize: 16, lineHeight: 1.6, color: "var(--text-muted)", margin: 0 }}>{p.copy}</p>
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </Reveal>
 
       {/* Contact */}
-      <section style={{ background: "var(--surface-subtle)", borderTop: "1px solid var(--border-default)" }}>
-        <div
-          style={{
-            ...container,
-            padding: "72px 32px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1.2fr",
-            gap: 64,
-          }}
-        >
+      <Reveal as="section" style={{ background: "var(--surface-subtle)", borderTop: "1px solid var(--border-default)" }}>
+        <div className="oer-container oer-section-y oer-about__contact-grid">
           <div>
-            <h2 style={h2Style}>Get in touch</h2>
+            <h2 className="oer-h2">Get in touch</h2>
             <p style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text-muted)", margin: "0 0 12px" }}>
               Questions about submitting, reviewing, or partnering? Send a note and the team will reply
               within two working days.
@@ -78,46 +94,7 @@ export function About() {
 
           <ContactFormCard />
         </div>
-      </section>
-    </>
+      </Reveal>
+    </div>
   );
 }
-
-const eyebrowStyle = {
-  fontFamily: "var(--font-label)",
-  fontSize: 13,
-  fontWeight: "var(--weight-medium)",
-  textTransform: "uppercase",
-  letterSpacing: "0.06em",
-  color: "var(--brand-secondary)",
-  marginBottom: 16,
-};
-
-const h1Style = {
-  fontFamily: "var(--font-heading)",
-  fontWeight: "var(--weight-display)",
-  fontSize: 40,
-  lineHeight: 1.1,
-  letterSpacing: "-0.02em",
-  color: "var(--text-default)",
-  margin: "0 0 20px",
-};
-
-const h2Style = {
-  fontFamily: "var(--font-heading)",
-  fontWeight: "var(--weight-display)",
-  fontSize: 32,
-  lineHeight: 1.2,
-  letterSpacing: "-0.01em",
-  color: "var(--text-default)",
-  margin: "0 0 16px",
-};
-
-const h3Style = {
-  fontFamily: "var(--font-heading)",
-  fontWeight: "var(--weight-display)",
-  fontSize: 20,
-  lineHeight: 1.4,
-  color: "var(--text-default)",
-  margin: "0 0 8px",
-};

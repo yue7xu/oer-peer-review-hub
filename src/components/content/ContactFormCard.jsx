@@ -5,12 +5,29 @@ import { Button } from "../forms/Button.jsx";
 
 const ROLE_OPTIONS = ["An educator", "An author", "A reviewer", "An institution", "Press / other"];
 
+const CSS = `
+.oer-contactform__row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 479px) { .oer-contactform__row { grid-template-columns: 1fr; } }
+`;
+
+let injected = false;
+function useStyles() {
+  if (!injected && typeof document !== "undefined") {
+    const el = document.createElement("style");
+    el.setAttribute("data-oer", "contactformcard");
+    el.textContent = CSS;
+    document.head.appendChild(el);
+    injected = true;
+  }
+}
+
 /**
  * ContactFormCard — the Name/Email/role-select/Message form shell used by
  * both About's "Get in touch" and Community's "Join the community" sections,
  * per Figma's own `ContactFormCard` component.
  */
 export function ContactFormCard({ roleOptions = ROLE_OPTIONS }) {
+  useStyles();
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e) => {
@@ -33,7 +50,7 @@ export function ContactFormCard({ roleOptions = ROLE_OPTIONS }) {
         </p>
       ) : (
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+          <div className="oer-contactform__row">
             <Input label="Name" placeholder="Your name" required />
             <Input label="Email" type="email" placeholder="you@institution.edu" required />
           </div>

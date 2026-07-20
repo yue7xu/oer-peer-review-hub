@@ -1,5 +1,15 @@
 [
   {
+    "date": "2026-07-19",
+    "scope": "page",
+    "page": "Community",
+    "macrostructure": "Ecosystem Index (adapted)",
+    "theme": "studied-DNA (source: url, structure-only)",
+    "theme_source": "https://lovable.dev/community — macrostructure/nav/footer archetypes adopted; palette + type stayed locked to project design.md, not Lovable's own dress",
+    "enrichment": "none — square/circle icon-in-shape placeholders for the pathway rail only",
+    "brief": "Community page rebuilt as a browsing hub: hero -> three-path pathway rail -> partner-institutions rail -> related-projects rail -> contact rail"
+  },
+  {
     "date": "2026-07-09",
     "scope": "app",
     "macrostructure": "preserved-per-page (marketing / app / content families)",
