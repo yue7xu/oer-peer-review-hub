@@ -1,6 +1,7 @@
 import React from "react";
 import { InstitutionCard } from "./InstitutionCard.jsx";
 import { useRevealOnScroll } from "../../lib/motion.js";
+import { injectStyles } from "../../lib/injectStyles.js";
 
 const CSS = `
 .oer-instgrid {
@@ -16,15 +17,8 @@ const CSS = `
 @media (prefers-reduced-motion: reduce) { .oer-instgrid li { transition: none; transition-delay: 0s; } }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "institutionsgrid");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("institutionsgrid", CSS);
 }
 
 /**

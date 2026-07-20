@@ -1,5 +1,6 @@
 import React from "react";
 import { useRevealOnScroll } from "../../lib/motion.js";
+import { injectStyles } from "../../lib/injectStyles.js";
 
 const CSS = `
 .oer-stepgrid__list {
@@ -31,15 +32,8 @@ const CSS = `
 }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "stepgrid");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("stepgrid", CSS);
 }
 
 /**

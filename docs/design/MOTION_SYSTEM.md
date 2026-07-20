@@ -327,8 +327,8 @@ reuses it directly):
   the nav's own mobile treatment (see `RESPONSIVE_BEHAVIOR.md` §
   Navigation behavior) — if nav collapses to a drawer, this indicator
   pattern likely doesn't apply inside the drawer (a vertical link list
-  doesn't need a sliding underline) — **`[[email protected]]`** flag for
-  the drawer's own interaction design, not reused as-is.
+  doesn't need a sliding underline) — flag for the drawer's own interaction
+  design, not reused as-is.
 - Reduced-motion fallback: **gap in current implementation** —
   `AnimatedTabBar.jsx` has no `prefers-reduced-motion` check at all; the
   `left`/`width` transition is a small, contained UI element (not a

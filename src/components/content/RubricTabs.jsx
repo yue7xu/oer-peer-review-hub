@@ -1,6 +1,7 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FilterChip } from "../forms/FilterChip.jsx";
 import { prefersReducedMotion } from "../../lib/motion.js";
+import { injectStyles } from "../../lib/injectStyles.js";
 
 /** Same disclosure timing as RoleTabs.jsx / RubricMethod.jsx. */
 const CONTENT_OUT_MS = 160;
@@ -18,15 +19,8 @@ const CSS = `
 }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "rubrictabs");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("rubrictabs", CSS);
 }
 
 /**
@@ -44,7 +38,6 @@ export function RubricTabs({ items }) {
   const shellRef = useRef(null);
   const panelRef = useRef(null);
   const timers = useRef([]);
-  const heightRef = useRef(0);
   const tabRefs = useRef({});
 
   const clearTimers = () => {
@@ -56,14 +49,14 @@ export function RubricTabs({ items }) {
     timers.current.push(id);
   };
 
+  useEffect(() => clearTimers, []);
+
   const measure = () => (panelRef.current ? Math.ceil(panelRef.current.getBoundingClientRect().height) : 0);
 
   useLayoutEffect(() => {
     const shell = shellRef.current;
     if (!shell) return;
-    const to = measure();
-    shell.style.height = `${to}px`;
-    heightRef.current = to;
+    shell.style.height = `${measure()}px`;
   }, [visibleId, contentShown]);
 
   const selectItem = (id) => {

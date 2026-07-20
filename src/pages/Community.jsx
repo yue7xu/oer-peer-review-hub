@@ -16,6 +16,7 @@ import { Reveal } from "../components/content/Reveal.jsx";
 import { CONTACT_CHANNELS } from "../data/contact.js";
 import { PARTNERS } from "../data/partners.js";
 import { usePageLayoutStyles } from "../design-system/pageLayout.js";
+import { injectStyles } from "../lib/injectStyles.js";
 
 const CSS = `
 .oer-community__section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 36px; flex-wrap: wrap; }
@@ -50,15 +51,8 @@ const CSS = `
 .oer-pathcard__desc { font-size: 14px; line-height: 1.6; color: var(--text-muted); margin: 0; flex: 1; }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "community");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("community", CSS);
 }
 
 const iconProps = {

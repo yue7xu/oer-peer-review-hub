@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Button } from "../forms/Button.jsx";
 import { AnimatedTabBar } from "./AnimatedTabBar.jsx";
+import { injectStyles } from "../../lib/injectStyles.js";
 
 const NAV_LINKS = [
   { to: "/browse", label: "Browse" },
@@ -82,15 +83,8 @@ const CSS = `
 }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "header");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("header", CSS);
 }
 
 function BurgerIcon() {
@@ -212,23 +206,35 @@ export function Header() {
         inert={!drawerOpen}
       >
         <div className="oer-header__drawer-head">
-          <button type="button" className="oer-header__drawer-close" aria-label="Close menu" onClick={closeDrawer}>
+          <button
+            type="button"
+            className="oer-header__drawer-close"
+            aria-label="Close menu"
+            onClick={closeDrawer}
+            tabIndex={drawerOpen ? undefined : -1}
+          >
             <CloseIcon />
           </button>
         </div>
         <div className="oer-header__drawer-links">
           {NAV_LINKS.map((link) => (
-            <NavLink key={link.to} to={link.to} className="oer-header__drawer-link" onClick={closeDrawer}>
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className="oer-header__drawer-link"
+              onClick={closeDrawer}
+              tabIndex={drawerOpen ? undefined : -1}
+            >
               {link.label}
             </NavLink>
           ))}
         </div>
         <hr className="oer-header__drawer-divider" />
         <div className="oer-header__drawer-actions">
-          <Button variant="secondary" size="lg" href="/" onClick={closeDrawer}>
+          <Button variant="secondary" size="lg" href="/" onClick={closeDrawer} tabIndex={drawerOpen ? undefined : -1}>
             Login
           </Button>
-          <Button variant="primary" size="lg" href="/" onClick={closeDrawer}>
+          <Button variant="primary" size="lg" href="/" onClick={closeDrawer} tabIndex={drawerOpen ? undefined : -1}>
             Sign up
           </Button>
         </div>

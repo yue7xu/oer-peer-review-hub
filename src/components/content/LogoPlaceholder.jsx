@@ -1,4 +1,5 @@
 import React from "react";
+import { injectStyles } from "../../lib/injectStyles.js";
 
 const CSS = `
 .oer-logoph {
@@ -10,15 +11,8 @@ const CSS = `
 .oer-logoph--circle { border-radius: var(--radius-full); }
 `;
 
-let injected = false;
 function useStyles() {
-  if (!injected && typeof document !== "undefined") {
-    const el = document.createElement("style");
-    el.setAttribute("data-oer", "logoplaceholder");
-    el.textContent = CSS;
-    document.head.appendChild(el);
-    injected = true;
-  }
+  injectStyles("logoplaceholder", CSS);
 }
 
 /**
