@@ -657,11 +657,46 @@ export const EXAMPLE_RESOURCE = {
               comment: "Worked examples and definitions check out against current disciplinary references; no factual corrections needed.",
             },
             {
+              label: "Currency and Contemporaneity",
+              standardDescription:
+                "Recent scholarship and current developments in the field sit alongside foundational knowledge, so the material reflects the discipline as it stands today, not just its history.",
+              rating: "exemplify",
+              comment: "Examples and case studies reference research from the last five years alongside the classic studies; nothing reads as dated.",
+            },
+            {
+              label: "Disciplinary Completeness and Coverage",
+              standardDescription:
+                "Core topics in the field are covered with appropriate depth, and the connections between concepts are made explicit rather than left implicit.",
+              rating: "does not meet",
+              comment: "Proportion and ratio notation shifts between Chapters 4 and 9 (\"a:b\" in one, \"a/b\" in the other, for the same relationships), which breaks the conceptual thread for a student reading straight through. Recommend standardizing on one notation before the next edition.",
+            },
+            {
+              label: "Scholarly Rigor and Theoretical Framework",
+              standardDescription:
+                "Analysis and argumentation rest on sound methods and an explicit theoretical framework recognized within the discipline.",
+              rating: "exemplify",
+              comment: "The statistical-reasoning chapters build on a consistent, clearly named theoretical framework, and each claim traces back to a cited method.",
+            },
+            {
               label: "College-Level Appropriateness and Cognitive Demand",
               standardDescription:
                 "Demonstrates appropriate intellectual complexity for college students; encourages critical thinking with suitable cognitive demand for the discipline.",
               rating: "exemplify",
               comment: "Problem sets scaffold from procedural to conceptual reasoning at a pace appropriate for an intermediate-level course.",
+            },
+            {
+              label: "Source Quality and Documentation",
+              standardDescription:
+                "Sources cited are credible and current, and documented to the citation standard expected within the discipline.",
+              rating: "exceed",
+              comment: "Every dataset and study cited includes a full reference; citation format is consistent with APA 7, the discipline's expected standard.",
+            },
+            {
+              label: "Assessment and Practice Quality",
+              standardDescription:
+                "Practice opportunities and assessments align with the material's key concepts and vary in form rather than relying on a single question type.",
+              rating: "exemplify",
+              comment: "Practice sets mix worked examples, open-response prompts, and applied case scenarios, so students are assessed on more than recall.",
             },
           ],
         },
@@ -712,11 +747,52 @@ export const EXAMPLE_RESOURCE = {
               comment: "CC BY 4.0 is declared on the copyright page and repeated in the footer of every chapter export.",
             },
             {
+              label: "Third-Party Content Documentation",
+              standardDescription:
+                "Every third-party image, dataset, or excerpt notes its source and the legal basis for including it (license, permission, or fair use).",
+              rating: "exemplify",
+              comment: "Every borrowed figure includes a source note identifying where it came from and under what license.",
+            },
+            {
               label: "Attribution Practices",
               standardDescription:
                 "Proper attribution is provided for all third-party content, including creator, title, source, license type, and any modifications made.",
               rating: "exceed",
               comment: "Third-party figures carry full TASL attribution (title, author, source, license) in captions, including notes on any cropping or recoloring.",
+            },
+            {
+              label: "Fair Use Application and Documentation",
+              standardDescription:
+                "Any fair-use claim is narrowly justified, limited in scope, and clearly signaled to downstream adopters who may not be able to rely on the same claim.",
+              rating: "exemplify",
+              comment: "The two fair-use claims (both short excerpts from copyrighted journal figures) are each accompanied by a rationale paragraph explaining the limited, transformative use.",
+            },
+            {
+              label: "License Compatibility",
+              standardDescription:
+                "Where multiple licensed components are combined, the licenses do not conflict, and share-alike terms are honored throughout.",
+              rating: "exemplify",
+              comment: "All third-party CC BY-SA figures are correctly carried forward under a compatible share-alike license for the whole chapter.",
+            },
+            {
+              label: "Public Domain Materials",
+              standardDescription:
+                "Public-domain status is accurately identified, explained to the reader, and kept distinct from openly licensed content.",
+              rating: "exemplify",
+              comment: "The two public-domain historical images are labeled as such, distinct from the CC-licensed figures around them.",
+            },
+            {
+              label: "Copyright Status Communication",
+              standardDescription: "An adopter can tell, without specialized legal training, what they may reuse and how.",
+              rating: "exceed",
+              comment: "The copyright page uses plain language (\"you may reuse and adapt this book...\") rather than legal boilerplate, so instructors don't need a lawyer to know what's allowed.",
+            },
+            {
+              label: "Permissions and Documentation Trail",
+              standardDescription:
+                "Explicit permissions obtained for any non-openly-licensed content are retained on file, with scope, attribution, and limits documented.",
+              rating: "exemplify",
+              comment: "The one directly-licensed textbook figure has a signed permission on file specifying non-commercial classroom use, matching how it's actually used here.",
             },
           ],
         },

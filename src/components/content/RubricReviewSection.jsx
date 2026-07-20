@@ -31,9 +31,12 @@ function useStyles() {
  * skips the rest — only `rubric` / `rubricId` / `status` are guaranteed.
  * Sub-block ids (`review-{rubricId}[-timeline|-review|-response|-revision]`)
  * are only emitted when the corresponding content exists, matching
- * RubricSidebarNav's sub-link generation exactly.
+ * RubricSidebarNav's sub-link generation exactly. Only the very first
+ * reviewer of the very first rubric section on the page opens expanded by
+ * default (`isFirstSection`, set by ResourceDetail.jsx) — every other
+ * reviewer, across every rubric, starts collapsed.
  */
-export function RubricReviewSection({ rubricReview }) {
+export function RubricReviewSection({ rubricReview, isFirstSection = false }) {
   useStyles();
   const rr = rubricReview;
 
@@ -53,7 +56,7 @@ export function RubricReviewSection({ rubricReview }) {
       {rr.reviewers && rr.reviewers.length > 0 && (
         <div className="oer-rubricsection__reviewerlist" id={`review-${rr.rubricId}-review`}>
           {rr.reviewers.map((rev, i) => (
-            <ReviewerCard key={`${rev.firstName}-${rev.lastName}`} reviewer={rev} defaultExpanded={i === 0} />
+            <ReviewerCard key={`${rev.firstName}-${rev.lastName}`} reviewer={rev} defaultExpanded={isFirstSection && i === 0} />
           ))}
         </div>
       )}
