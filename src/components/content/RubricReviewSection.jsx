@@ -12,6 +12,10 @@ const CSS = `
 .oer-rubricsection__subhead { font-family: var(--font-heading); font-weight: var(--weight-display); font-size: 18px; color: var(--text-default); margin: 0; }
 .oer-rubricsection__date { font-family: var(--font-mono); font-size: 13px; color: var(--text-subtle); }
 .oer-rubricsection__text { font-size: 15px; line-height: 1.6; color: var(--text-default); margin: 0; }
+@media (max-width: 639px) {
+  .oer-rubricsection { padding: 20px 16px; gap: 20px; }
+  .oer-rubricsection__title { font-size: 20px; overflow-wrap: anywhere; }
+}
 `;
 
 let injected = false;
