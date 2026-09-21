@@ -9,18 +9,18 @@ const CSS = `
    not a drawn edge. Hover lifts with the system's near-invisible whisper
    shadow rather than darkening a border. */
 .oer-rc {
-  display: flex; align-items: stretch; gap: 28px; box-sizing: border-box;
+  display: flex; align-items: stretch; gap: 24px; box-sizing: border-box;
   background: var(--surface-subtle); border: none;
   border-radius: var(--radius-lg); padding: 32px;
   box-shadow: none; transition: box-shadow 150ms var(--ease-out);
 }
 .oer-rc:hover { box-shadow: var(--shadow-subtle); }
-/* Cover slot (Browse only): one fixed 3:4 box for every book regardless of
+/* Cover slot (Browse only): one fixed 120x160 (3:4) box for every book regardless of
    source platform, so Pressbooks and OpenStax covers render identically.
    Images crop to fill (object-fit), never stretch. The placeholder occupies the
    same box, so a card without a cover keeps the same layout. */
 .oer-rc__cover {
-  flex: none; display: block; width: 144px; height: 192px; align-self: flex-start;
+  flex: none; display: block; width: 120px; height: 160px; align-self: flex-start;
   border-radius: var(--radius-md); overflow: hidden; background: var(--color-stone);
   box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, var(--shadow-inset-hairline);
 }
@@ -35,7 +35,7 @@ const CSS = `
    the same 12px rhythm the card had before; min-width:0 lets long titles wrap
    instead of pushing the card wider than its column. */
 .oer-rc__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
-/* The cover takes 172px (144 + 28 gap) from the text column, so the abstract
+/* The cover takes 144px (120 + 24 gap) from the text column, so the abstract
    gets one extra line to show at least as much text as it did before. */
 .oer-rc--cover .oer-rc__abstract { -webkit-line-clamp: 4; }
 /* Tags, title and authors: the part that sits beside the cover on phones. */
@@ -65,18 +65,20 @@ a.oer-rc__title:hover { color: var(--text-brand); }
 @media (max-width: 639px) {
   .oer-rc { padding: 20px; }
 }
-/* Narrow screens (phone / portrait tablet): a 144px cover beside the text would
-   leave ~130px for it, so the cover shrinks (still one 3:4 size for every card)
-   and sits beside the header only; the abstract and footer run the full card
-   width underneath. The body is flattened with display:contents so its
-   children become grid items. Badges may wrap here, otherwise a long
-   discipline name (nowrap) overflows the narrower header column. */
+/* Narrow screens (phone / portrait tablet): a cover beside the whole text
+   column leaves only ~170px for it, so the cover shrinks (still one 3:4 size
+   for every card) and sits beside the header only; the abstract and footer run
+   the full card width underneath. The body is flattened with display:contents
+   so its children become grid items. Badges and status pills may wrap here:
+   they are nowrap, so a long discipline name overflows the narrower header
+   column and a long rubric pill overflows a 320px card. */
 @media (max-width: 767px) {
   .oer-rc--cover { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 16px; row-gap: 12px; }
   .oer-rc--cover .oer-rc__body { display: contents; }
   .oer-rc--cover .oer-rc__cover { width: 96px; height: 128px; grid-column: 1; grid-row: 1; }
   .oer-rc--cover .oer-rc__head { grid-column: 2; grid-row: 1; }
   .oer-rc--cover .oer-rc__tags .oer-badge { white-space: normal; }
+  .oer-rc--cover .oer-rc__tagrow .oer-status { max-width: 100%; white-space: normal; line-height: 1.25; padding-top: 4px; padding-bottom: 4px; }
   .oer-rc--cover .oer-rc__abstract { grid-column: 1 / -1; -webkit-line-clamp: 3; }
   .oer-rc--cover .oer-rc__foot { grid-column: 1 / -1; margin-top: 0; }
 }

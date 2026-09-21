@@ -110,7 +110,7 @@ not tracked in this repo). `Browse.jsx` still filters/sorts/searches client-side
 async fetch instead of a static import.
 
 Book covers: `public.resources.cover_url` (nullable) feeds `ResourceCard`'s
-Browse-variant cover slot (fixed 144×192, 3:4, `object-fit: cover`); null or a failed
+Browse-variant cover slot (fixed 120×160, 3:4, `object-fit: cover`; 96×128 beside the header only on screens ≤767px); null or a failed
 load shows a same-size "No cover" placeholder. Cover images live in the public
 Supabase Storage bucket `covers` (2 MB limit; png/webp/jpeg only), named
 `<resource id>.<ext>`, and `cover_url` is their public URL
