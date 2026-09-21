@@ -112,6 +112,8 @@ function mapRow(row) {
     statusLabel: row.status_label,
     revisedResourceUrl: row.revised_resource_url,
     rubricReviews: row.rubric_reviews || [],
+    // Optional book-cover image URL. Null → ResourceCard shows the placeholder.
+    coverUrl: row.cover_url || null,
   };
 }
 
@@ -165,6 +167,9 @@ export const EXAMPLE_RESOURCE = {
   // details" sidebar's original-publish/last-updated dates.
   year: "2025",
   isExample: true,
+  // Same cover as the catalog's Introduction to Psychology 2e row (Storage
+  // bucket `covers`); the example is hardcoded, so its URL is too.
+  coverUrl: `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/covers/introduction-to-psychology-2e.png`,
   // OER-level fact: the resource itself was revised/republished. Per the
   // Section 8 aggregation rule, this alone is enough to roll the OER-level
   // status up to "Peer Reviewed · Revised" regardless of any single

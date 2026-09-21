@@ -109,6 +109,16 @@ not tracked in this repo). `Browse.jsx` still filters/sorts/searches client-side
 `useMemo` once the fetched array is in state — same pattern as before, just fed by an
 async fetch instead of a static import.
 
+Book covers: `public.resources.cover_url` (nullable) feeds `ResourceCard`'s
+Browse-variant cover slot (fixed 120×160, 3:4, `object-fit: cover`; 96×128 beside the header only on screens ≤767px); null or a failed
+load shows a same-size "No cover" placeholder. Cover images live in the public
+Supabase Storage bucket `covers` (2 MB limit; png/webp/jpeg only), named
+`<resource id>.<ext>`, and `cover_url` is their public URL
+(`https://<project>.supabase.co/storage/v1/object/public/covers/<file>`). The bucket
+has no write policies, so the client can't upload — add files via the Supabase
+dashboard (Storage → covers) or the service role, then
+`update public.resources set cover_url = '<public url>' where id = '<id>'`.
+
 To add a catalog entry: write/run an `insert into public.resources (...)` against the
 Supabase project (ask Claude to do this in a session with Supabase MCP access) —
 don't add it to a `RAW` array in this repo, there isn't one anymore.
