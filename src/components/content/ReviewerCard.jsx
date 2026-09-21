@@ -18,6 +18,9 @@ const CSS = `
 .oer-reviewer__aff { font-size: 14px; color: var(--text-muted); }
 .oer-reviewer__summary { margin-top: 10px; font-size: 14px; color: var(--text-muted); }
 .oer-reviewer__body { margin-top: 6px; }
+@media (max-width: 639px) {
+  .oer-reviewer { padding: 14px 14px; }
+}
 `;
 
 let injected = false;

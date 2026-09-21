@@ -17,6 +17,23 @@ const CSS = `
 a.oer-coverage__rubric:hover { color: var(--text-brand-hover); }
 .oer-coverage__date { font-family: var(--font-mono); font-size: 13px; color: var(--text-subtle); }
 .oer-coverage__tally { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); }
+
+/* Four columns don't fit a phone: each row becomes a stacked block with the
+   column header repeated above its value (via data-label) instead of scrolling
+   the table sideways. */
+@media (max-width: 639px) {
+  .oer-coverage, .oer-coverage tbody, .oer-coverage tr, .oer-coverage td { display: block; }
+  .oer-coverage thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .oer-coverage tr { padding: 14px 0; border-bottom: 1px solid var(--border-default); }
+  .oer-coverage tr:last-child { border-bottom: none; }
+  .oer-coverage td { padding: 6px 0; border-bottom: none; }
+  .oer-coverage td::before {
+    content: attr(data-label); display: block; margin-bottom: 3px;
+    font-family: var(--font-label); font-weight: var(--weight-medium); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-subtle);
+  }
+  .oer-coverage td:first-child::before { display: none; }
+}
 `;
 
 let injected = false;
@@ -71,11 +88,11 @@ export function ReviewCoverageTable({ rubricReviews = [], className = "", ...res
                   {RUBRIC_DESCRIPTIONS[rr.rubric] && <InfoIcon title={RUBRIC_DESCRIPTIONS[rr.rubric]} />}
                 </div>
               </td>
-              <td className="oer-coverage__tally">{tallyFor(rr) || "—"}</td>
-              <td>
+              <td className="oer-coverage__tally" data-label="Exceed / Exemplifies / Does not meet">{tallyFor(rr) || "—"}</td>
+              <td data-label="Status">
                 <StatusBadge status={rr.status}>{SHORT_STATUS_LABEL[rr.status] || rr.status}</StatusBadge>
               </td>
-              <td className="oer-coverage__date">{reviewer ? `${reviewer.firstName} ${reviewer.lastName}` : "—"}</td>
+              <td className="oer-coverage__date" data-label="Last Reviewed by">{reviewer ? `${reviewer.firstName} ${reviewer.lastName}` : "—"}</td>
             </tr>
           );
         })}

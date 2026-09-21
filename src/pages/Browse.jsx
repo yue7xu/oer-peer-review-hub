@@ -11,8 +11,43 @@ import { HighlightText } from "../components/content/HighlightText.jsx";
 import { EmptyState } from "../components/content/EmptyState.jsx";
 import { Badge } from "../components/feedback/Badge.jsx";
 import { fetchResources, buildFacetGroups, RUBRIC_DESCRIPTIONS, EXAMPLE_RESOURCE, getAggregatedStatus } from "../data/resources.js";
+import { injectStyles } from "../lib/injectStyles.js";
 
 const container = { maxWidth: 1280, margin: "0 auto" };
+
+const CSS = `
+.oer-browse__gutter { padding-left: 32px; padding-right: 32px; }
+.oer-browse__searchbar { padding-top: 24px; padding-bottom: 24px; display: flex; gap: 12px; align-items: center; }
+.oer-browse__searchbar-field { flex: 1; min-width: 0; }
+.oer-browse__body {
+  padding-top: 32px; padding-bottom: 32px;
+  display: grid; grid-template-columns: 264px minmax(0, 1fr); gap: 40px; width: 100%; box-sizing: border-box;
+}
+.oer-browse__aside { align-self: start; min-width: 0; }
+.oer-btn.oer-browse__filtertoggle { display: none; }
+.oer-browse__sort { min-width: 220px; }
+
+/* Single column: the filter sidebar becomes a collapsible panel behind a
+   "Filters" toggle so results are reachable without scrolling past every
+   facet first. */
+@media (max-width: 899px) {
+  .oer-browse__gutter { padding-left: 24px; padding-right: 24px; }
+  .oer-browse__body { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .oer-btn.oer-browse__filtertoggle { display: inline-flex; width: 100%; justify-content: center; }
+  .oer-browse__aside { display: none; }
+  .oer-browse__aside--open { display: block; }
+}
+@media (max-width: 639px) {
+  .oer-browse__gutter { padding-left: 16px; padding-right: 16px; }
+  .oer-browse__searchbar { padding-top: 16px; padding-bottom: 16px; gap: 8px; }
+  .oer-browse__body { padding-top: 24px; padding-bottom: 24px; }
+  .oer-browse__sort { min-width: 0; width: 100%; }
+}
+`;
+
+function useStyles() {
+  injectStyles("browse", CSS);
+}
 
 const SORTS = {
   default: { label: "Default order", compare: null },
@@ -29,6 +64,8 @@ function emptySelection() {
 }
 
 export function Browse() {
+  useStyles();
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [pendingSelected, setPendingSelected] = useState(emptySelection);
   const [appliedSelected, setAppliedSelected] = useState(emptySelection);
@@ -64,7 +101,10 @@ export function Browse() {
     });
   };
 
-  const applyFilters = () => setAppliedSelected(pendingSelected);
+  const applyFilters = () => {
+    setAppliedSelected(pendingSelected);
+    setFiltersOpen(false);
+  };
 
   const clearAll = () => {
     setPendingSelected(emptySelection());
@@ -78,6 +118,7 @@ export function Browse() {
   };
 
   const pendingCount = Object.values(pendingSelected).reduce((n, s) => n + (s ? s.size : 0), 0);
+  const appliedCount = Object.values(appliedSelected).reduce((n, s) => n + (s ? s.size : 0), 0);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -115,8 +156,8 @@ export function Browse() {
     <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       {/* Search bar */}
       <div style={{ background: "var(--surface-subtle)", borderBottom: "1px solid var(--border-default)" }}>
-        <div style={{ ...container, padding: "24px 32px", display: "flex", gap: 12, alignItems: "center" }}>
-          <div style={{ flex: 1 }}>
+        <div className="oer-browse__gutter oer-browse__searchbar" style={container}>
+          <div className="oer-browse__searchbar-field">
             <Input
               placeholder="Search by title, author, discipline, or institution…"
               value={query}
@@ -131,18 +172,21 @@ export function Browse() {
       </div>
 
       {/* Body: sidebar + results */}
-      <div
-        style={{
-          ...container,
-          padding: 32,
-          display: "grid",
-          gridTemplateColumns: "264px 1fr",
-          gap: 40,
-          width: "100%",
-        }}
-      >
+      <div className="oer-browse__gutter oer-browse__body" style={container}>
+        <Button
+          variant="secondary"
+          size="md"
+          type="button"
+          className="oer-browse__filtertoggle"
+          aria-expanded={filtersOpen}
+          aria-controls="browse-filters"
+          onClick={() => setFiltersOpen((v) => !v)}
+        >
+          {filtersOpen ? "Hide filters" : `Filters${appliedCount > 0 ? ` · ${appliedCount}` : ""}`}
+        </Button>
+
         {/* Filter sidebar */}
-        <aside style={{ alignSelf: "start" }}>
+        <aside id="browse-filters" className={`oer-browse__aside${filtersOpen ? " oer-browse__aside--open" : ""}`}>
           <div
             style={{
               display: "flex",
@@ -291,7 +335,7 @@ export function Browse() {
                 </div>
               )}
             </div>
-            <div style={{ minWidth: 220 }}>
+            <div className="oer-browse__sort">
               <Select label="Sort by" value={sort} onChange={(e) => setSort(e.target.value)}>
                 {Object.entries(SORTS).map(([key, s]) => (
                   <option key={key} value={key}>

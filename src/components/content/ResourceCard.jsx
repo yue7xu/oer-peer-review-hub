@@ -45,6 +45,7 @@ const CSS = `
   line-height: 1.4; color: var(--text-default); margin: 0; text-decoration: none;
 }
 a.oer-rc__title:hover { color: var(--text-brand); }
+.oer-rc__title, .oer-rc__authors { overflow-wrap: anywhere; }
 .oer-rc__authors { font-family: var(--font-body); font-size: 14px; line-height: 1.5; color: var(--text-muted); }
 .oer-rc__abstract {
   font-family: var(--font-body); font-size: 16px; line-height: 1.6; color: var(--text-default);
@@ -59,6 +60,9 @@ a.oer-rc__title:hover { color: var(--text-brand); }
 .oer-rc__tagrow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .oer-rc__more { font-family: var(--font-label); font-size: 13px; font-weight: var(--weight-medium); color: var(--text-brand); text-decoration: none; }
 .oer-rc__more:hover { color: var(--text-brand-hover); }
+@media (max-width: 639px) {
+  .oer-rc { padding: 20px; }
+}
 `;
 
 let injected = false;
