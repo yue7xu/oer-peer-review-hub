@@ -38,6 +38,8 @@ const CSS = `
 /* The cover takes 172px (144 + 28 gap) from the text column, so the abstract
    gets one extra line to show at least as much text as it did before. */
 .oer-rc--cover .oer-rc__abstract { -webkit-line-clamp: 4; }
+/* Tags, title and authors: the part that sits beside the cover on phones. */
+.oer-rc__head { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .oer-rc__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .oer-rc__tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .oer-rc__title {
@@ -62,6 +64,21 @@ a.oer-rc__title:hover { color: var(--text-brand); }
 .oer-rc__more:hover { color: var(--text-brand-hover); }
 @media (max-width: 639px) {
   .oer-rc { padding: 20px; }
+}
+/* Narrow screens (phone / portrait tablet): a 144px cover beside the text would
+   leave ~130px for it, so the cover shrinks (still one 3:4 size for every card)
+   and sits beside the header only; the abstract and footer run the full card
+   width underneath. The body is flattened with display:contents so its
+   children become grid items. Badges may wrap here, otherwise a long
+   discipline name (nowrap) overflows the narrower header column. */
+@media (max-width: 767px) {
+  .oer-rc--cover { display: grid; grid-template-columns: 96px minmax(0, 1fr); column-gap: 16px; row-gap: 12px; }
+  .oer-rc--cover .oer-rc__body { display: contents; }
+  .oer-rc--cover .oer-rc__cover { width: 96px; height: 128px; grid-column: 1; grid-row: 1; }
+  .oer-rc--cover .oer-rc__head { grid-column: 2; grid-row: 1; }
+  .oer-rc--cover .oer-rc__tags .oer-badge { white-space: normal; }
+  .oer-rc--cover .oer-rc__abstract { grid-column: 1 / -1; -webkit-line-clamp: 3; }
+  .oer-rc--cover .oer-rc__foot { grid-column: 1 / -1; margin-top: 0; }
 }
 `;
 
@@ -161,26 +178,28 @@ export function ResourceCard({
     <article className={`oer-rc${variant === "browse" ? " oer-rc--cover" : ""} ${className}`.trim()} {...rest}>
       {variant === "browse" && <Cover src={coverUrl} href={href} />}
       <div className="oer-rc__body">
-        <div className="oer-rc__top">
-          <div className="oer-rc__tags">
-            {discipline && <Badge variant="neutral">{discipline}</Badge>}
-            {license && <Badge variant="brand">{license}</Badge>}
+        <div className="oer-rc__head">
+          <div className="oer-rc__top">
+            <div className="oer-rc__tags">
+              {discipline && <Badge variant="neutral">{discipline}</Badge>}
+              {license && <Badge variant="brand">{license}</Badge>}
+            </div>
+            {variant === "featured" && <StatusBadge status={status} />}
           </div>
-          {variant === "featured" && <StatusBadge status={status} />}
+          {href ? (
+            <a className="oer-rc__title" href={href}>
+              {title}
+            </a>
+          ) : (
+            <h3 className="oer-rc__title">{title}</h3>
+          )}
+          {authors && (
+            <div className="oer-rc__authors">
+              {authors}
+              {variant === "browse" && updated && ` · Updated ${updated}`}
+            </div>
+          )}
         </div>
-        {href ? (
-          <a className="oer-rc__title" href={href}>
-            {title}
-          </a>
-        ) : (
-          <h3 className="oer-rc__title">{title}</h3>
-        )}
-        {authors && (
-          <div className="oer-rc__authors">
-            {authors}
-            {variant === "browse" && updated && ` · Updated ${updated}`}
-          </div>
-        )}
         {abstract && <p className="oer-rc__abstract">{abstract}</p>}
         <div className="oer-rc__foot">
           {variant === "browse" && rubricReviews ? (
