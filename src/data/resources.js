@@ -112,6 +112,8 @@ function mapRow(row) {
     statusLabel: row.status_label,
     revisedResourceUrl: row.revised_resource_url,
     rubricReviews: row.rubric_reviews || [],
+    // Optional book-cover image URL. Null → ResourceCard shows the placeholder.
+    coverUrl: row.cover_url || null,
   };
 }
 

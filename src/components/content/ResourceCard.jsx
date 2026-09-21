@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StatusBadge, SHORT_STATUS_LABEL } from "../feedback/StatusBadge.jsx";
 import { Badge } from "../feedback/Badge.jsx";
 import { OutboundLink } from "./OutboundLink.jsx";
@@ -9,12 +9,35 @@ const CSS = `
    not a drawn edge. Hover lifts with the system's near-invisible whisper
    shadow rather than darkening a border. */
 .oer-rc {
-  display: flex; flex-direction: column; gap: 12px; box-sizing: border-box;
+  display: flex; align-items: stretch; gap: 28px; box-sizing: border-box;
   background: var(--surface-subtle); border: none;
   border-radius: var(--radius-lg); padding: 32px;
   box-shadow: none; transition: box-shadow 150ms var(--ease-out);
 }
 .oer-rc:hover { box-shadow: var(--shadow-subtle); }
+/* Cover slot (Browse only): one fixed 3:4 box for every book regardless of
+   source platform, so Pressbooks and OpenStax covers render identically.
+   Images crop to fill (object-fit), never stretch. The placeholder occupies the
+   same box, so a card without a cover keeps the same layout. */
+.oer-rc__cover {
+  flex: none; display: block; width: 144px; height: 192px; align-self: flex-start;
+  border-radius: var(--radius-md); overflow: hidden; background: var(--color-stone);
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, var(--shadow-inset-hairline);
+}
+.oer-rc__cover img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.oer-rc__cover--empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: var(--shadow-inset-hairline);
+}
+.oer-rc__cover--empty svg { width: 32px; height: 32px; }
+.oer-rc__cover--empty span { font-family: var(--font-label); font-size: 12px; font-weight: var(--weight-medium); color: var(--text-muted); }
+/* Everything that used to be the card's direct children now lives here, with
+   the same 12px rhythm the card had before; min-width:0 lets long titles wrap
+   instead of pushing the card wider than its column. */
+.oer-rc__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+/* The cover takes 172px (144 + 28 gap) from the text column, so the abstract
+   gets one extra line to show at least as much text as it did before. */
+.oer-rc--cover .oer-rc__abstract { -webkit-line-clamp: 4; }
 .oer-rc__top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .oer-rc__tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .oer-rc__title {
@@ -30,6 +53,7 @@ a.oer-rc__title:hover { color: var(--text-brand); }
 .oer-rc__foot {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding-top: 14px; border-top: 1px solid var(--color-stone-strong); flex-wrap: wrap;
+  margin-top: auto; /* pin to the card bottom when the cover makes the card taller than its text */
 }
 .oer-rc__meta { font-family: var(--font-label); font-size: 13px; color: var(--text-subtle); }
 .oer-rc__tagrow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -70,6 +94,37 @@ function ReviewTagRow({ rubricReviews, href }) {
   );
 }
 
+// Book cover for the Browse variant. Falls back to the same-size placeholder
+// when there's no URL or the image fails to load (dead hotlink, blocked host).
+function Cover({ src, href }) {
+  const [failed, setFailed] = useState(false);
+  const hasImage = src && !failed;
+  const inner = hasImage ? (
+    <img src={src} alt="" loading="lazy" decoding="async" onError={() => setFailed(true)} />
+  ) : (
+    <>
+      <svg viewBox="0 0 32 32" fill="none" stroke="var(--color-ash)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M6 5.5A2.5 2.5 0 0 1 8.5 3H25v21H8.5A2.5 2.5 0 0 0 6 26.5v-21Z" />
+        <path d="M6 26.5A2.5 2.5 0 0 0 8.5 29H25v-5" />
+        <path d="M12 9h8" />
+      </svg>
+      <span>No cover</span>
+    </>
+  );
+  const className = `oer-rc__cover${hasImage ? "" : " oer-rc__cover--empty"}`;
+  // Decorative: the adjacent title link already names the resource, so the
+  // cover repeats its destination but stays out of the tab order / a11y tree.
+  return href ? (
+    <a className={className} href={href} tabIndex={-1} aria-hidden="true">
+      {inner}
+    </a>
+  ) : (
+    <div className={className} aria-hidden="true">
+      {inner}
+    </div>
+  );
+}
+
 /**
  * ResourceCard — composes StatusBadge, Badge and OutboundLink.
  *
@@ -77,7 +132,8 @@ function ReviewTagRow({ rubricReviews, href }) {
  * aggregated top-right StatusBadge + a plain review-count footer.
  * `variant="browse"` is Browse's richer treatment: no top-right badge, an
  * "· Updated {date}" byline, and a per-rubric ReviewTagRow footer instead of
- * the aggregated count.
+ * the aggregated count. It also reserves a fixed cover slot on the left
+ * (`coverUrl`, or a same-size placeholder when null).
  */
 export function ResourceCard({
   title,
@@ -92,44 +148,48 @@ export function ResourceCard({
   variant = "featured",
   updated = null,
   rubricReviews = null,
+  coverUrl = null,
   className = "",
   ...rest
 }) {
   useStyles();
   return (
-    <article className={`oer-rc ${className}`.trim()} {...rest}>
-      <div className="oer-rc__top">
-        <div className="oer-rc__tags">
-          {discipline && <Badge variant="neutral">{discipline}</Badge>}
-          {license && <Badge variant="brand">{license}</Badge>}
+    <article className={`oer-rc${variant === "browse" ? " oer-rc--cover" : ""} ${className}`.trim()} {...rest}>
+      {variant === "browse" && <Cover src={coverUrl} href={href} />}
+      <div className="oer-rc__body">
+        <div className="oer-rc__top">
+          <div className="oer-rc__tags">
+            {discipline && <Badge variant="neutral">{discipline}</Badge>}
+            {license && <Badge variant="brand">{license}</Badge>}
+          </div>
+          {variant === "featured" && <StatusBadge status={status} />}
         </div>
-        {variant === "featured" && <StatusBadge status={status} />}
-      </div>
-      {href ? (
-        <a className="oer-rc__title" href={href}>
-          {title}
-        </a>
-      ) : (
-        <h3 className="oer-rc__title">{title}</h3>
-      )}
-      {authors && (
-        <div className="oer-rc__authors">
-          {authors}
-          {variant === "browse" && updated && ` · Updated ${updated}`}
-        </div>
-      )}
-      {abstract && <p className="oer-rc__abstract">{abstract}</p>}
-      <div className="oer-rc__foot">
-        {variant === "browse" && rubricReviews ? (
-          <ReviewTagRow rubricReviews={rubricReviews} href={href} />
+        {href ? (
+          <a className="oer-rc__title" href={href}>
+            {title}
+          </a>
         ) : (
-          <span className="oer-rc__meta">
-            {reviewCount != null
-              ? `${reviewCount} peer review${reviewCount === 1 ? "" : "s"}`
-              : ""}
-          </span>
+          <h3 className="oer-rc__title">{title}</h3>
         )}
-        {sourceHref && <OutboundLink href={sourceHref} variant="inline" />}
+        {authors && (
+          <div className="oer-rc__authors">
+            {authors}
+            {variant === "browse" && updated && ` · Updated ${updated}`}
+          </div>
+        )}
+        {abstract && <p className="oer-rc__abstract">{abstract}</p>}
+        <div className="oer-rc__foot">
+          {variant === "browse" && rubricReviews ? (
+            <ReviewTagRow rubricReviews={rubricReviews} href={href} />
+          ) : (
+            <span className="oer-rc__meta">
+              {reviewCount != null
+                ? `${reviewCount} peer review${reviewCount === 1 ? "" : "s"}`
+                : ""}
+            </span>
+          )}
+          {sourceHref && <OutboundLink href={sourceHref} variant="inline" />}
+        </div>
       </div>
     </article>
   );

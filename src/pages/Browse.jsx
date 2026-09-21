@@ -266,6 +266,7 @@ export function Browse() {
               variant="browse"
               updated={EXAMPLE_RESOURCE.lastUpdated}
               rubricReviews={EXAMPLE_RESOURCE.rubricReviews}
+              coverUrl={EXAMPLE_RESOURCE.coverUrl}
             />
             <div style={{ borderTop: "1px solid var(--border-default)", marginTop: 32 }} />
           </div>
@@ -368,6 +369,7 @@ export function Browse() {
                   variant="browse"
                   updated={r.lastUpdated}
                   rubricReviews={r.rubricReviews}
+                  coverUrl={r.coverUrl}
                 />
               ))}
             </div>
