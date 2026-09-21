@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Badge } from "../components/feedback/Badge.jsx";
 import { StatusBadge } from "../components/feedback/StatusBadge.jsx";
@@ -7,7 +7,7 @@ import { RubricReviewSection } from "../components/content/RubricReviewSection.j
 import { RubricSidebarNav } from "../components/content/RubricSidebarNav.jsx";
 import { OutboundLink } from "../components/content/OutboundLink.jsx";
 import { Button } from "../components/forms/Button.jsx";
-import { getResourceById } from "../data/resources.js";
+import { fetchResourceById, EXAMPLE_RESOURCE } from "../data/resources.js";
 import { injectStyles } from "../lib/injectStyles.js";
 
 const container = { maxWidth: 1280, margin: "0 auto" };
@@ -60,9 +60,42 @@ function useStyles() {
 export function ResourceDetail() {
   useStyles();
   const { id } = useParams();
-  const resource = getResourceById(id);
+  const isExample = id === EXAMPLE_RESOURCE.id;
+  const [resource, setResource] = useState(isExample ? EXAMPLE_RESOURCE : null);
+  const [loadState, setLoadState] = useState(isExample ? "ready" : "loading"); // "loading" | "ready" | "error"
 
-  if (!resource) {
+  useEffect(() => {
+    if (isExample) {
+      setResource(EXAMPLE_RESOURCE);
+      setLoadState("ready");
+      return;
+    }
+    let cancelled = false;
+    setLoadState("loading");
+    fetchResourceById(id)
+      .then((data) => {
+        if (cancelled) return;
+        setResource(data);
+        setLoadState("ready");
+      })
+      .catch((err) => {
+        console.error("Failed to load resource from Supabase:", err);
+        if (!cancelled) setLoadState("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id, isExample]);
+
+  if (loadState === "loading") {
+    return (
+      <div style={{ ...container, padding: "72px 32px", textAlign: "center" }}>
+        <p style={{ fontSize: 16, color: "var(--text-muted)" }}>Loading resource…</p>
+      </div>
+    );
+  }
+
+  if (loadState === "error" || !resource) {
     return (
       <div style={{ ...container, padding: "72px 32px", textAlign: "center" }}>
         <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: "var(--weight-display)", fontSize: 28, color: "var(--text-default)", margin: "0 0 12px" }}>

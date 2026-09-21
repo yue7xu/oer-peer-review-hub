@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Input } from "../components/forms/Input.jsx";
 import { Button } from "../components/forms/Button.jsx";
 import { Select } from "../components/forms/Select.jsx";
@@ -10,7 +10,7 @@ import { RubricInfoPopover } from "../components/content/RubricInfoPopover.jsx";
 import { HighlightText } from "../components/content/HighlightText.jsx";
 import { EmptyState } from "../components/content/EmptyState.jsx";
 import { Badge } from "../components/feedback/Badge.jsx";
-import { RESOURCES, FACET_GROUPS, RUBRIC_DESCRIPTIONS, EXAMPLE_RESOURCE, getAggregatedStatus } from "../data/resources.js";
+import { fetchResources, buildFacetGroups, RUBRIC_DESCRIPTIONS, EXAMPLE_RESOURCE, getAggregatedStatus } from "../data/resources.js";
 import { injectStyles } from "../lib/injectStyles.js";
 
 const container = { maxWidth: 1280, margin: "0 auto" };
@@ -70,6 +70,27 @@ export function Browse() {
   const [pendingSelected, setPendingSelected] = useState(emptySelection);
   const [appliedSelected, setAppliedSelected] = useState(emptySelection);
   const [sort, setSort] = useState("default");
+  const [resources, setResources] = useState([]);
+  const [loadState, setLoadState] = useState("loading"); // "loading" | "ready" | "error"
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchResources()
+      .then((data) => {
+        if (cancelled) return;
+        setResources(data);
+        setLoadState("ready");
+      })
+      .catch((err) => {
+        console.error("Failed to load resources from Supabase:", err);
+        if (!cancelled) setLoadState("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const facetGroups = useMemo(() => buildFacetGroups(resources), [resources]);
 
   const togglePending = (groupKey, label) => {
     setPendingSelected((prev) => {
@@ -101,9 +122,9 @@ export function Browse() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    let list = RESOURCES.filter((r) => {
+    let list = resources.filter((r) => {
       if (getAggregatedStatus(r) == null) return false;
-      for (const group of FACET_GROUPS) {
+      for (const group of facetGroups) {
         const active = appliedSelected[group.key];
         if (active && active.size > 0) {
           if (group.key === "rubric") {
@@ -124,9 +145,9 @@ export function Browse() {
     const compare = SORTS[sort].compare;
     if (compare) list = [...list].sort(compare);
     return list;
-  }, [query, appliedSelected, sort]);
+  }, [resources, facetGroups, query, appliedSelected, sort]);
 
-  const activeGroups = FACET_GROUPS.map((group) => {
+  const activeGroups = facetGroups.map((group) => {
     const values = [...(appliedSelected[group.key] || [])];
     return { group, values };
   }).filter(({ values }) => values.length > 0);
@@ -199,7 +220,7 @@ export function Browse() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-            {FACET_GROUPS.map((group) => {
+            {facetGroups.map((group) => {
               // Discipline/Rubric/Material-type get a right-aligned bare count
               // (Figma's primary facets); everything else keeps the count
               // inline in parens next to the label.
@@ -367,7 +388,14 @@ export function Browse() {
           )}
 
           {/* Results list */}
-          {filtered.length > 0 ? (
+          {loadState === "loading" ? (
+            <p style={{ fontSize: 15, color: "var(--text-subtle)" }}>Loading resources…</p>
+          ) : loadState === "error" ? (
+            <EmptyState
+              title="Couldn't load the catalog"
+              message="The resource list couldn't be reached right now. Please try refreshing the page."
+            />
+          ) : filtered.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {filtered.map((r) => (
                 <ResourceCard
