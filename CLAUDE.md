@@ -81,23 +81,34 @@ status-to-tone mapping for a resource's version history. If you add a new status
 add it to the `REVIEW` map in `StatusBadge.jsx` and the `TONE` map in
 `ReviewTimeline.jsx` together — they must stay in sync.
 
-### Data layer
+### Data layer — Supabase-backed, read-only from the client
 
-`src/data/resources.js` is the single source of truth for catalog data — real OER
-entries transcribed from the Hub's tracking spreadsheet (referenced in the file's
-header comment), not placeholder content. It exports:
+Catalog data lives in a Supabase Postgres project (`public.resources` table), not in
+the repo. `src/lib/supabaseClient.js` creates the client from `VITE_SUPABASE_URL` /
+`VITE_SUPABASE_PUBLISHABLE_KEY` (see `.env.example`; copy to `.env.local` for local
+dev — the publishable/anon key is safe to commit/expose client-side). `src/data/
+resources.js` fetches and shapes that data; it exports:
 
-- `RESOURCES` — the enriched array (raw entries run through `slugify` for `id`,
-  `splitList` for `authorList`/`additionalSubjectList`, `materialKind` inference from
-  `bookInfo` text, `leadYear` extraction, and a hardcoded `status: "unreviewed"` since
-  no submission has entered peer review yet).
-- `getResourceById(id)` — used by `ResourceDetail.jsx` (route `/resource/:id`).
-- `FACET_GROUPS` — filter facets for `Browse.jsx`, computed dynamically from
-  `RESOURCES` (counts per `primarySubject`, `materialKind`, `license`, `institution`),
-  not hand-maintained.
+- `fetchResources()` — async, returns every row from `public.resources` mapped from
+  snake_case DB columns to the camelCase shape components expect (`authorList`,
+  `primarySubject`, `rubricReviews`, etc.). Used by `Browse.jsx` in a `useEffect`.
+- `fetchResourceById(id)` — async, single-row lookup. Used by `ResourceDetail.jsx`
+  (route `/resource/:id`).
+- `buildFacetGroups(resources)` — takes an already-fetched resources array and
+  returns `Browse.jsx`'s sidebar filter facets (counts per `primarySubject`,
+  `materialKind`, `license`, `institution`, etc.) — call it after `fetchResources()`
+  resolves, not at module load (there's no synchronous `RESOURCES`/`FACET_GROUPS`
+  export anymore).
+- `EXAMPLE_RESOURCE` — the one hardcoded exception (`isExample: true`), illustrating
+  the fully-populated card/detail layout. Not stored in Supabase.
 
-`Browse.jsx` filters/sorts/searches `RESOURCES` client-side (no backend) via
-`useMemo`, and reads/writes the active facet selection in local component state.
+RLS on `public.resources` grants `SELECT` to the anon/publishable key only — **there
+is no public write path**. The catalog is single-writer: only the maintainer adds or
+edits rows, directly via SQL against the Supabase project (migrations under Supabase,
+not tracked in this repo). `Browse.jsx` still filters/sorts/searches client-side via
+`useMemo` once the fetched array is in state — same pattern as before, just fed by an
+async fetch instead of a static import.
 
-To add a catalog entry: add an object to the `RAW` array in `resources.js` — the
-derived fields are computed automatically, don't set them by hand.
+To add a catalog entry: write/run an `insert into public.resources (...)` against the
+Supabase project (ask Claude to do this in a session with Supabase MCP access) —
+don't add it to a `RAW` array in this repo, there isn't one anymore.

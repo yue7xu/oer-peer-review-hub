@@ -1,11 +1,15 @@
-// Real OER catalog data, sourced from the Hub's tracking spreadsheet
-// (https://docs.google.com/spreadsheets/d/1oki7MGPVL5MH2J1_p_CUcmY0TamZ3U0v1ctSdFHzdgc).
-// Each entry has since been assigned a peer-review status of "peer_reviewed"
-// and a set of rubrics it was reviewed against (product-owner supplied
-// mapping — see REAL_RUBRIC_ASSIGNMENTS below). The reviewer identities
-// attached to those rubric reviews are realistic PLACEHOLDERS — no reviewer
-// has actually been assigned to these submissions yet; replace with real
-// reviewer-assignment data once it exists (see PLACEHOLDER_REVIEWER_POOL).
+// Catalog data now lives in Supabase (`public.resources` table), read live by
+// every visitor via the anon/publishable key. Only the maintainer writes to
+// it (via SQL run directly against the project) — there is no public write
+// path, enforced by RLS (see the `create_resources_table` /
+// `seed_resources_from_catalog` migrations). This module fetches and shapes
+// that data for the frontend; it is no longer the source of truth itself.
+//
+// `EXAMPLE_RESOURCE` below is the one exception: it's explicitly synthetic
+// (`isExample: true`), illustrating the fully-populated card/detail layout,
+// and stays hardcoded rather than living in the database.
+
+import { supabase } from "../lib/supabaseClient.js";
 
 export function slugify(title) {
   return title
@@ -22,14 +26,6 @@ function splitList(value) {
     .filter(Boolean);
 }
 
-function leadYear(...texts) {
-  for (const text of texts) {
-    const match = text && text.match(/\b(19|20)\d{2}\b/);
-    if (match) return match[0];
-  }
-  return null;
-}
-
 function materialKind(bookInfo) {
   if (!bookInfo) return "Unspecified";
   const text = bookInfo.toLowerCase();
@@ -41,8 +37,6 @@ function materialKind(bookInfo) {
 
 function platformFromUrl(url) {
   if (!url) return "Not specified";
-  // open.maricopa.edu is Maricopa's Pressbooks-based OER repository, running
-  // under a custom domain rather than *.pressbooks.pub.
   if (url.includes("pressbooks") || url.includes("open.maricopa.edu")) return "Pressbooks";
   if (url.includes("docs.google.com")) return "Google Docs";
   if (url.includes("sites.google.com")) return "Google Sites";
@@ -64,11 +58,6 @@ const CANONICAL_STATUSES = [
   { key: "peer_reviewed_revised", label: "Peer Reviewed · Revised" },
 ];
 
-function statusLabelFor(key) {
-  const match = CANONICAL_STATUSES.find((s) => s.key === key);
-  return match ? match.label : key;
-}
-
 // The six O4PR single-point rubrics (HubSpot content map, Tab 2; full
 // criteria in `6 new rubric md/rubric_*.md` at the project root).
 const CANONICAL_RUBRICS = [
@@ -79,40 +68,6 @@ const CANONICAL_RUBRICS = [
   "eLearning",
   "Universal Design for Learning",
 ];
-
-// Placeholder reviewer identities for the real catalog's rubric reviews.
-// No reviewer has actually been assigned to these submissions yet — these
-// are realistic stand-ins (per product-owner direction) so the per-rubric
-// UI has something to render, NOT a record of who actually reviewed these
-// resources. Replace once real reviewer-assignment data exists.
-const PLACEHOLDER_REVIEWER_POOL = [
-  { firstName: "Priya", lastName: "Raman", affiliation: "Georgia Institute of Technology · Instructional Design" },
-  { firstName: "Marcus", lastName: "Bellweather", affiliation: "University of Michigan · Accessible Media" },
-  { firstName: "Elena", lastName: "Vasquez", affiliation: "University of Texas at Austin · Curriculum & Instruction" },
-  { firstName: "Samuel", lastName: "Okonkwo", affiliation: "Ohio State University · Copyright & Scholarly Communication" },
-  { firstName: "Grace", lastName: "Lindqvist", affiliation: "University of Washington · Learning Sciences" },
-  { firstName: "Daniel", lastName: "Reyes", affiliation: "Portland Community College · Editorial Services" },
-  { firstName: "Naomi", lastName: "Whitfield", affiliation: "Colorado State University · Universal Design for Learning" },
-  { firstName: "Tobias", lastName: "Klein", affiliation: "Indiana University · Disciplinary Review Board" },
-];
-
-let placeholderReviewerCursor = 0;
-function nextPlaceholderReviewer() {
-  const reviewer = PLACEHOLDER_REVIEWER_POOL[placeholderReviewerCursor % PLACEHOLDER_REVIEWER_POOL.length];
-  placeholderReviewerCursor += 1;
-  return reviewer;
-}
-
-function buildRealRubricReviews(rubricNames) {
-  return rubricNames.map((rubric) => ({
-    rubric,
-    rubricId: slugify(rubric),
-    status: "peer_reviewed",
-    reviewers: [nextPlaceholderReviewer()],
-    // No criteria/timeline/authorResponse/authorRevision yet — none of that
-    // detail exists for real submissions.
-  }));
-}
 
 // Counts a reviewer's per-criterion ratings into the three rubric buckets.
 // Shared by ReviewCoverageTable (rubric-level tally) and ReviewerCard
@@ -129,265 +84,58 @@ export function tallyRatings(criteria) {
   return counts;
 }
 
-// Product-owner supplied mapping of which rubric(s) each real catalog entry
-// has been reviewed against ("Discipline" in the source instruction is
-// shorthand for the canonical "Disciplinary Appropriateness").
-const REAL_RUBRIC_ASSIGNMENTS = {
-  "Introduction to Psychology 2e": [
-    "Accessibility",
-    "Copyright",
-    "Copy Editing",
-    "Disciplinary Appropriateness",
-    "Universal Design for Learning",
-  ],
-  "Psychology Through the Lifespan": [
-    "Accessibility",
-    "Copyright",
-    "Disciplinary Appropriateness",
-    "Universal Design for Learning",
-  ],
-  "The Connected Mind": ["Accessibility", "Copyright", "Disciplinary Appropriateness", "Universal Design for Learning"],
-  "Psychology of Parenting": ["Disciplinary Appropriateness"],
-  "Lifespan Development": ["Accessibility", "Copyright"],
-  "Social Psychology": ["Copy Editing", "Disciplinary Appropriateness"],
-  "Human Biology": ["Accessibility", "Universal Design for Learning"],
-  "Attenuated Democracy: A Critical Introduction to U.S. Government and Politics": ["Disciplinary Appropriateness"],
-  "Making Statistics Come Alive with Desmos Scientific Calculator & Stats Calculator": ["Disciplinary Appropriateness"],
-  "Comparing Functions through Different Representations using Desmos Graphing Calculator": [
-    "Disciplinary Appropriateness",
-  ],
-  "Equity in Mathematics through Desmos Graphing Calculator": ["Disciplinary Appropriateness"],
-  "Just in Time — Math Lessons for Chemistry (Summer/Fall 2025 Project)": ["Disciplinary Appropriateness"],
-  "MAT 12X — Intermediate Algebra": ["Accessibility", "Disciplinary Appropriateness"],
-  "Health Information Literacy": ["Accessibility", "Copyright", "Copy Editing"],
-};
+// Converts a `public.resources` row (snake_case, as returned by Supabase)
+// into the camelCase shape the frontend components consume.
+function mapRow(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    authors: row.authors,
+    authorList: row.author_list || [],
+    primarySubject: row.primary_subject,
+    additionalSubjects: row.additional_subjects,
+    additionalSubjectList: row.additional_subject_list || [],
+    institution: row.institution,
+    bookInfo: row.book_info,
+    materialKind: row.material_kind,
+    abstract: row.abstract,
+    license: row.license,
+    publishDate: row.publish_date,
+    lastUpdated: row.last_updated,
+    year: row.year,
+    sourceUrl: row.source_url,
+    sourceNote: row.source_note,
+    platform: row.platform,
+    language: row.language,
+    targetLearner: row.target_learner,
+    status: row.status,
+    statusLabel: row.status_label,
+    revisedResourceUrl: row.revised_resource_url,
+    rubricReviews: row.rubric_reviews || [],
+  };
+}
 
-const RAW = [
-  {
-    title: "Introduction to Psychology 2e",
-    authors: "Julie Lazzara",
-    primarySubject: "Psychology",
-    additionalSubjects: null,
-    institution: "Chandler-Gilbert Community College",
-    bookInfo: "Textbook; remixed version of OpenStax Psychology 2e",
-    abstract:
-      "Remixed version of OpenStax Psychology 2e, realigned to MCCCD's PSY101 course outline and competencies; chapter numbers omitted for instructor flexibility.",
-    license: "CC BY 4.0",
-    publishDate: "2020 (original upload); 1st Maricopa Edition April 2021",
-    lastUpdated: "January 2025",
-    sourceUrl: "https://open.maricopa.edu/intropsych2me/",
-  },
-  {
-    title: "Psychology Through the Lifespan",
-    authors: "Julie Lazzara; Alisa Beyer",
-    primarySubject: "Psychology",
-    additionalSubjects: null,
-    institution: "Chandler-Gilbert Community College",
-    bookInfo: "Textbook; age-based approach to lifespan developmental psychology",
-    abstract:
-      "Derivative of Lifespan Development: A Psychological Perspective (Lally & Valentine-French), Lifespan Psychology (Overstreet), Adolescent Development (Lansford), Emerging Adulthood (Arnett), and The Developing Parent (Diener).",
-    license: "CC BY-NC-SA 4.0",
-    publishDate: "2020 (3rd edition, June 2020)",
-    lastUpdated: "January 2025 (major update)",
-    sourceUrl: "https://open.maricopa.edu/psy240mm/",
-  },
-  {
-    title: "The Connected Mind",
-    authors: "Julie Lazzara",
-    primarySubject: "Psychology",
-    additionalSubjects: "Culture",
-    institution: "Chandler-Gilbert Community College",
-    bookInfo: "Textbook and course; Psychology and Culture",
-    abstract:
-      "Comprehensive, openly licensed Psychology and Culture book/course adapted from existing OER, incorporating updated research and culturally relevant pedagogy; cross-disciplinary examples for non-psychology majors; adapted from Rio Salado College's PSY132 course.",
-    license: "CC BY-NC-SA 4.0",
-    publishDate: "2025",
-    lastUpdated: null,
-    sourceUrl: "https://open.maricopa.edu/psy132/",
-  },
-  {
-    title: "Psychology of Parenting",
-    authors: "Alisa Beyer",
-    primarySubject: "Psychology",
-    additionalSubjects: null,
-    institution: "Chandler-Gilbert Community College",
-    bookInfo: "Textbook",
-    abstract:
-      "Created for students and professionals working with children/families (educators, caregivers, direct support workers); adapted from Lang's ‘Parenting and Family Diversity Issues’ and sections of Beyer & Lazzara's Lifespan Development OER.",
-    license: null,
-    publishDate: null,
-    lastUpdated: null,
-    sourceUrl: "https://open.maricopa.edu/psyparent/",
-  },
-  {
-    title: "Lifespan Development",
-    authors: "Alisa Beyer and multiple contributors",
-    primarySubject: "Psychology",
-    additionalSubjects: null,
-    institution: "Chandler-Gilbert Community College",
-    bookInfo: "Textbook",
-    abstract:
-      "Aligns to topics/objectives of most intro developmental psychology courses; covers physical, cognitive, social, emotional development across the lifespan.",
-    license: "CC BY 4.0",
-    publishDate: "2020",
-    lastUpdated: null,
-    sourceUrl: "https://open.maricopa.edu/devpsych/",
-    sourceNote:
-      "The source spreadsheet flags this link as possibly incorrect — it may actually point to open.maricopa.edu/psy240mm/.",
-  },
-  {
-    title: "Social Psychology",
-    authors: "Ashley Biddle",
-    primarySubject: "Social Psychology",
-    additionalSubjects: null,
-    institution: "Leeward Community College",
-    bookInfo: null,
-    abstract:
-      "Course site by Ashley Biddle (Leeward CC instructor teaching PSY 250 Social Psychology, among other courses).",
-    license: null,
-    publishDate: null,
-    lastUpdated: null,
-    sourceUrl: "https://sites.google.com/view/social-psychology-travel/home",
-  },
-  {
-    title: "Human Biology",
-    authors: "Janet Wang-Lee",
-    primarySubject: "Human Biology",
-    additionalSubjects: null,
-    institution: "Leeward Community College",
-    bookInfo: "Textbook",
-    abstract:
-      "Full human biology textbook covering cell structure, energy/metabolism, reproduction, osmoregulation, DNA replication, and related topics.",
-    license: "CC BY-NC-SA 4.0",
-    publishDate: null,
-    lastUpdated: null,
-    sourceUrl: "https://pressbooks-dev.oer.hawaii.edu/janetwanglee/",
-  },
-  {
-    title: "Attenuated Democracy: A Critical Introduction to U.S. Government and Politics",
-    authors: "David Hubert",
-    primarySubject: "Political Science",
-    additionalSubjects: null,
-    institution: "Salt Lake Community College",
-    bookInfo: "Textbook",
-    abstract:
-      "OER textbook for U.S. Government & Politics courses; author is Associate Provost for Learning Advancement at SLCC.",
-    license: "CC BY-NC-SA",
-    publishDate: null,
-    lastUpdated: null,
-    sourceUrl: "https://slcc.pressbooks.pub/attenuateddemocracy/",
-  },
-  {
-    title: "Making Statistics Come Alive with Desmos Scientific Calculator & Stats Calculator",
-    authors: "Melina Priewe",
-    primarySubject: "Mathematics",
-    additionalSubjects: "Statistics",
-    institution: "Mesa Community College",
-    bookInfo: "Instructional video series / guided notes",
-    abstract:
-      "Videos teaching students to use the Desmos Scientific Calculator and Stats Calculator, created to support online students lacking equivalent in-person demonstrations; part of Open Maricopa OER Grant Final Products.",
-    license: "CC BY-NC 4.0",
-    publishDate: null,
-    lastUpdated: null,
-    sourceUrl:
-      "https://docs.google.com/document/d/1T5eh-vrsqCZnEWt9uA9R828zez_W_bYrScCArdqymO8/edit?usp=sharing",
-  },
-  {
-    title: "Comparing Functions through Different Representations using Desmos Graphing Calculator",
-    authors: "Melina Priewe",
-    primarySubject: "Mathematics",
-    additionalSubjects: "Functions (Introductory & Intermediate Algebra)",
-    institution: "Mesa Community College",
-    bookInfo: null,
-    abstract: null,
-    license: null,
-    publishDate: null,
-    lastUpdated: null,
-    sourceUrl:
-      "https://docs.google.com/document/d/1LB1o_wnad4cGJAPavZC8GiZTxe4quBSbxX3SYlyw5tA/edit?usp=sharing",
-  },
-  {
-    title: "Equity in Mathematics through Desmos Graphing Calculator",
-    authors: "Melina Priewe",
-    primarySubject: "Mathematics",
-    additionalSubjects: "Exponential & Quadratic Functions (Intermediate Algebra)",
-    institution: "Mesa Community College",
-    bookInfo: "Instructional video series / guided notes",
-    abstract:
-      "Videos parallel to Scottsdale CC's TI-84 MAT 12X videos, created to give online students a Desmos Graphing Calculator alternative to reduce textbook costs; part of Open Maricopa OER Grant Final Products.",
-    license: "CC BY-NC 4.0",
-    publishDate: null,
-    lastUpdated: null,
-    sourceUrl:
-      "https://docs.google.com/document/d/1vYXAiIQmE-wyjPAqoL8lAilDoXFodgUeT3mQD3OqI5c/edit?usp=sharing",
-  },
-  {
-    title: "Just in Time — Math Lessons for Chemistry (Summer/Fall 2025 Project)",
-    authors: "Melina Priewe",
-    primarySubject: "Mathematics",
-    additionalSubjects: "Chemistry — Just in Time Math Lessons",
-    institution: "Mesa Community College",
-    bookInfo: null,
-    abstract:
-      "Math-skills-review lessons designed to support students in chemistry courses (aligns with MCC's developmental Chemistry prep course).",
-    license: null,
-    publishDate: null,
-    lastUpdated: null,
-    sourceUrl:
-      "https://docs.google.com/document/d/1G6vqVe-cp55jtQu7ExChOB2Jt4aGLrlZ8AnsZY6_7dE/edit?usp=sharing",
-  },
-  {
-    title: "MAT 12X — Intermediate Algebra",
-    authors: "Melina Priewe",
-    primarySubject: "Mathematics",
-    additionalSubjects: "Intermediate Algebra",
-    institution: "Mesa Community College",
-    bookInfo: null,
-    abstract:
-      "References Scottsdale Community College's existing MAT 12X (Intermediate Algebra) TI-84 instructional video library as its base; extends it with Desmos Graphing Calculator parallel videos.",
-    license: null,
-    publishDate: null,
-    lastUpdated: null,
-    sourceUrl:
-      "https://docs.google.com/document/d/1B4BTO--fxQSC40FvOBy2_aajMZBeFzz8R3YfL6iuM6o/edit?usp=sharing",
-  },
-  {
-    title: "Health Information Literacy",
-    authors: "Serene Rock",
-    primarySubject: "Information Literacy",
-    additionalSubjects: "Fitness / Nutrition",
-    institution: "Scottsdale Community College",
-    bookInfo: null,
-    abstract:
-      "Serene Rock is a librarian at Scottsdale Community College Library, involved in information literacy instruction.",
-    license: null,
-    publishDate: null,
-    lastUpdated: null,
-    sourceUrl:
-      "https://lor.instructure.com/resources/19c8fb8cea1545afaa3aefcb5c43fa5e?shared",
-  },
-];
+// Fetches the full live catalog. Read-only (RLS grants SELECT to the anon
+// key only) — throws on failure so callers can show an error state.
+export async function fetchResources() {
+  const { data, error } = await supabase.from("resources").select("*").order("title", { ascending: true });
+  if (error) throw error;
+  return (data || []).map(mapRow);
+}
 
-export const RESOURCES = RAW.map((r) => ({
-  ...r,
-  id: slugify(r.title),
-  authorList: splitList(r.authors),
-  additionalSubjectList: splitList(r.additionalSubjects),
-  materialKind: materialKind(r.bookInfo),
-  platform: platformFromUrl(r.sourceUrl),
-  year: leadYear(r.publishDate, r.lastUpdated),
-  status: "peer_reviewed",
-  statusLabel: statusLabelFor("peer_reviewed"),
-  rubricReviews: buildRealRubricReviews(REAL_RUBRIC_ASSIGNMENTS[r.title] || []),
-}));
+export async function fetchResourceById(id) {
+  const { data, error } = await supabase.from("resources").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data ? mapRow(data) : null;
+}
 
 // A single illustrative record — every field populated, including a full
 // per-rubric peer-review history — so the ResourceCard and ResourceDetail
-// layouts can be seen in their fully-populated state. None of the sheet's
-// real entries have this level of detail yet (see RAW above), so this is
-// clearly marked `isExample: true` rather than presented as a live catalog
-// record. The DOI uses CrossRef's reserved 10.5555 test prefix — never
-// resolves, an intentional placeholder rather than a real link.
+// layouts can be seen in their fully-populated state. This is clearly
+// marked `isExample: true` rather than presented as a live catalog record,
+// and (unlike the rest of the catalog) is not stored in Supabase. The DOI
+// uses CrossRef's reserved 10.5555 test prefix — never resolves, an
+// intentional placeholder rather than a real link.
 const EXAMPLE_RAW = {
   title: "Introduction to Psychology 2e",
   authors: "Julie Lazzara",
@@ -810,11 +558,6 @@ export const EXAMPLE_RESOURCE = {
   ],
 };
 
-export function getResourceById(id) {
-  if (id === EXAMPLE_RESOURCE.id) return EXAMPLE_RESOURCE;
-  return RESOURCES.find((r) => r.id === id) || null;
-}
-
 /**
  * getAggregatedStatus(resource) — rolls up an OER's per-rubric review
  * records into a single public-facing lifecycle status. Computed at
@@ -888,50 +631,53 @@ const PARTNER_INSTITUTIONS_WITH_NO_OER_YET = [
 // but no current catalog entry is hosted there.
 const PARTNER_PLATFORMS_WITH_NO_OER_YET = ["OpenStax"];
 
-// Order matches the Figma sidebar (Discipline → Rubric → Material type →
-// Institution → Status → Language); Licence/Platform/Target learner have no
-// Figma-visible slot so they're kept (real data shouldn't be dropped) but
-// appended after the Figma-confirmed groups.
-export const FACET_GROUPS = [
-  { key: "primarySubject", label: "Discipline", options: facetOptions(RESOURCES, "primarySubject") },
-  {
-    key: "rubric",
-    label: "Rubric",
-    options: CANONICAL_RUBRICS.map((label) => ({
-      label,
-      count: RESOURCES.filter((r) => r.rubricReviews.some((rr) => rr.rubric === label)).length,
-    })),
-  },
-  {
-    key: "materialKind",
-    label: "Material type",
-    options: facetOptions(RESOURCES, "materialKind", CANONICAL_MATERIAL_KINDS),
-  },
-  {
-    key: "institution",
-    label: "Institution",
-    options: facetOptions(RESOURCES, "institution", PARTNER_INSTITUTIONS_WITH_NO_OER_YET),
-  },
-  {
-    key: "statusLabel",
-    label: "Status",
-    options: CANONICAL_STATUSES.map(({ key, label }) => ({
-      label,
-      count: RESOURCES.filter((r) => r.status === key).length,
-    })),
-  },
-  // Language and Target learner are part of the project's metadata map, but
-  // the source spreadsheet has no such columns — every resource is honestly
-  // "Not specified" rather than a guessed value.
-  { key: "language", label: "Language", options: facetOptions(RESOURCES, "language") },
-  { key: "license", label: "Licence", options: facetOptions(RESOURCES, "license", CANONICAL_LICENSES) },
-  {
-    key: "platform",
-    label: "Platform",
-    options: facetOptions(RESOURCES, "platform", PARTNER_PLATFORMS_WITH_NO_OER_YET),
-  },
-  { key: "targetLearner", label: "Target learner", options: facetOptions(RESOURCES, "targetLearner") },
-];
+// Builds the Browse sidebar's filter facets from a live (already-fetched)
+// `resources` array. Order matches the Figma sidebar (Discipline → Rubric →
+// Material type → Institution → Status → Language); Licence/Platform/Target
+// learner have no Figma-visible slot so they're kept (real data shouldn't be
+// dropped) but appended after the Figma-confirmed groups.
+export function buildFacetGroups(resources) {
+  return [
+    { key: "primarySubject", label: "Discipline", options: facetOptions(resources, "primarySubject") },
+    {
+      key: "rubric",
+      label: "Rubric",
+      options: CANONICAL_RUBRICS.map((label) => ({
+        label,
+        count: resources.filter((r) => r.rubricReviews.some((rr) => rr.rubric === label)).length,
+      })),
+    },
+    {
+      key: "materialKind",
+      label: "Material type",
+      options: facetOptions(resources, "materialKind", CANONICAL_MATERIAL_KINDS),
+    },
+    {
+      key: "institution",
+      label: "Institution",
+      options: facetOptions(resources, "institution", PARTNER_INSTITUTIONS_WITH_NO_OER_YET),
+    },
+    {
+      key: "statusLabel",
+      label: "Status",
+      options: CANONICAL_STATUSES.map(({ key, label }) => ({
+        label,
+        count: resources.filter((r) => r.status === key).length,
+      })),
+    },
+    // Language and Target learner are part of the project's metadata map, but
+    // the source spreadsheet has no such columns — every resource is honestly
+    // "Not specified" rather than a guessed value.
+    { key: "language", label: "Language", options: facetOptions(resources, "language") },
+    { key: "license", label: "Licence", options: facetOptions(resources, "license", CANONICAL_LICENSES) },
+    {
+      key: "platform",
+      label: "Platform",
+      options: facetOptions(resources, "platform", PARTNER_PLATFORMS_WITH_NO_OER_YET),
+    },
+    { key: "targetLearner", label: "Target learner", options: facetOptions(resources, "targetLearner") },
+  ];
+}
 
 // First paragraph of each rubric's full write-up (see `6 new rubric md/` at
 // the repo root) — used as the InfoIcon tooltip wherever a rubric name
