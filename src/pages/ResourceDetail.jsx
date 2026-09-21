@@ -15,6 +15,42 @@ const container = { maxWidth: 1280, margin: "0 auto" };
 const CSS = `
 .oer-detail-institution-link { text-decoration: none; }
 .oer-detail-institution-link:hover { text-decoration: underline; }
+
+.oer-detail__gutter { padding-left: 32px; padding-right: 32px; }
+.oer-detail__title { padding-top: 24px; padding-bottom: 36px; }
+.oer-detail__body {
+  padding-top: 40px; padding-bottom: 40px;
+  display: grid; grid-template-columns: 1fr 340px; gap: 48px; width: 100%; box-sizing: border-box;
+}
+.oer-detail__h1 { font-size: 40px; }
+.oer-detail__crumbs { overflow-wrap: anywhere; }
+/* Sidebar — capped to the viewport height and independently scrollable, so
+   scrolling it never scrolls the main column (and vice versa) once its own
+   content overflows. */
+.oer-detail__aside {
+  align-self: start; display: flex; flex-direction: column; gap: 20px; min-width: 0;
+  position: sticky; top: 88px; max-height: calc(100vh - 112px); overflow-y: auto;
+}
+.oer-detail__cta-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* Single column: the sidebar drops below the main column and stops being
+   sticky/height-capped (a capped inner scroller is hostile on touch). The
+   in-page rubric nav is dropped too — it would sit below the very content it
+   links to, and the coverage table already links to each rubric section. */
+@media (max-width: 899px) {
+  .oer-detail__gutter { padding-left: 24px; padding-right: 24px; }
+  .oer-detail__title { padding-bottom: 28px; }
+  .oer-detail__body { grid-template-columns: minmax(0, 1fr); gap: 40px; padding-top: 32px; padding-bottom: 32px; }
+  .oer-detail__h1 { font-size: 34px; }
+  .oer-detail__aside { position: static; max-height: none; overflow-y: visible; }
+  .oer-detail__aside .oer-rubricnav { display: none; }
+}
+@media (max-width: 639px) {
+  .oer-detail__gutter { padding-left: 16px; padding-right: 16px; }
+  .oer-detail__title { padding-top: 16px; padding-bottom: 24px; }
+  .oer-detail__body { gap: 32px; padding-top: 24px; padding-bottom: 24px; }
+  .oer-detail__h1 { font-size: 28px; }
+}
 `;
 
 function useStyles() {
@@ -99,7 +135,7 @@ export function ResourceDetail() {
     <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       {/* Title block */}
       <div style={{ background: "var(--surface-subtle)", borderBottom: "1px solid var(--border-default)" }}>
-        <div style={{ ...container, padding: "24px 32px 36px" }}>
+        <div className="oer-detail__gutter oer-detail__title" style={container}>
           {resource.isExample && (
             <div
               style={{
@@ -120,7 +156,7 @@ export function ResourceDetail() {
               </span>
             </div>
           )}
-          <div style={{ fontFamily: "var(--font-label)", fontSize: 13, color: "var(--text-subtle)", marginBottom: 20 }}>
+          <div className="oer-detail__crumbs" style={{ fontFamily: "var(--font-label)", fontSize: 13, color: "var(--text-subtle)", marginBottom: 20 }}>
             <Link to="/browse">Browse</Link> &nbsp;/&nbsp; <Link to="/browse">{resource.primarySubject}</Link> &nbsp;/&nbsp;{" "}
             <span style={{ color: "var(--text-muted)" }}>{resource.title}</span>
           </div>
@@ -134,10 +170,10 @@ export function ResourceDetail() {
             {resource.license && <Badge variant="brand">{resource.license}</Badge>}
           </div>
           <h1
+            className="oer-detail__h1"
             style={{
               fontFamily: "var(--font-heading)",
               fontWeight: "var(--weight-display)",
-              fontSize: 40,
               lineHeight: 1.1,
               letterSpacing: "-0.02em",
               color: "var(--text-default)",
@@ -158,16 +194,7 @@ export function ResourceDetail() {
       </div>
 
       {/* Body */}
-      <div
-        style={{
-          ...container,
-          padding: "40px 32px",
-          display: "grid",
-          gridTemplateColumns: "1fr 340px",
-          gap: 48,
-          width: "100%",
-        }}
-      >
+      <div className="oer-detail__gutter oer-detail__body" style={container}>
         {/* Main */}
         <main style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: 44 }}>
           <section>
@@ -233,21 +260,8 @@ export function ResourceDetail() {
           )}
         </main>
 
-        {/* Sidebar — capped to the viewport height and independently
-            scrollable, so scrolling it never scrolls the main column (and
-            vice versa) once its own content overflows */}
-        <aside
-          style={{
-            alignSelf: "start",
-            display: "flex",
-            flexDirection: "column",
-            gap: 20,
-            position: "sticky",
-            top: 88,
-            maxHeight: "calc(100vh - 112px)",
-            overflowY: "auto",
-          }}
-        >
+        {/* Sidebar — see .oer-detail__aside for sticky/scroll behavior */}
+        <aside className="oer-detail__aside">
           {/* Outbound checkout */}
           <div style={{ borderRadius: "var(--radius-lg)", padding: 24, background: "var(--surface-default)", boxShadow: "var(--shadow-subtle)" }}>
             <div style={{ fontFamily: "var(--font-label)", fontSize: 13, color: "var(--text-subtle)", marginBottom: 14 }}>
@@ -261,7 +275,7 @@ export function ResourceDetail() {
                 {resource.sourceNote}
               </div>
             )}
-            <div style={{ display: "flex", gap: 10 }}>
+            <div className="oer-detail__cta-row">
               <Button variant="secondary" size="md">
                 Add to collection
               </Button>
@@ -300,7 +314,7 @@ export function ResourceDetail() {
       {/* Bottom CTA */}
       {resource.sourceUrl && (
         <div style={{ borderTop: "1px solid var(--border-default)" }}>
-          <div style={{ ...container, padding: "32px 32px 56px", textAlign: "center" }}>
+          <div className="oer-detail__gutter" style={{ ...container, paddingTop: 32, paddingBottom: 56, textAlign: "center" }}>
             <OutboundLink href={resource.sourceUrl}>Access this OER</OutboundLink>
           </div>
         </div>

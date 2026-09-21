@@ -20,6 +20,10 @@ const CSS = `
 .oer-rating-pill--exemplify .oer-rating-pill__dot { background: var(--feedback-info-icon); }
 .oer-rating-pill--does-not-meet { background: var(--feedback-error-background); color: var(--feedback-error-text); }
 .oer-rating-pill--does-not-meet .oer-rating-pill__dot { background: var(--feedback-error-icon); }
+@media (max-width: 639px) {
+  .oer-ratings__row { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .oer-ratings__row > .oer-rating-pill { justify-self: start; }
+}
 `;
 
 let injected = false;
